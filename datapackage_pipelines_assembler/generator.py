@@ -9,8 +9,6 @@ from datapackage_pipelines.generators import (
     SCHEDULE_DAILY
 )
 
-from . import pipeline_steps
-
 import logging
 log = logging.getLogger(__name__)
 
@@ -28,5 +26,15 @@ class Generator(GeneratorBase):
 
     @classmethod
     def generate_pipeline(cls, source):
-        #TODO: Code here
-        pass
+        meta = source['meta']
+        pipeline_id = '{owner}/{id}'.format(**meta)
+        yield pipeline_id, {
+            'pipeline': [
+                {
+                    'run': 'add_metadata',
+                    'parameters': {
+                        'name': 'demo'
+                    }
+                }
+            ]
+        }

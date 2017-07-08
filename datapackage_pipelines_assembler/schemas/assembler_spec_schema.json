@@ -2,6 +2,14 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "owner": {"type": "string"},
+        "id": {"type": "string"},
+        "version": {"type": "integer"}
+      }
+    }
   }
 }
 
