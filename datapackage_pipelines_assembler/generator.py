@@ -28,12 +28,41 @@ class Generator(GeneratorBase):
     def generate_pipeline(cls, source):
         meta = source['meta']
         pipeline_id = '{owner}/{id}'.format(**meta)
+
+        inputs = source.get('inputs', [])
+        assert len(inputs) == 1, 'Only supporting one input atm'
+
+        input = inputs[0]
+        assert input['kind'] == 'datapackage', 'Only supporting datapackage inputs atm'
+
+        parameters = input.get('parameters', {})
+
         yield pipeline_id, {
             'pipeline': [
                 {
-                    'run': 'add_metadata',
+                    'run': 'load_metadata',
                     'parameters': {
-                        'name': 'demo'
+                        'url': input['url']
+                    }
+                },
+                {
+                    'run': 'assembler.load_modified_resources',
+                    'parameters': {
+                        'url': input['url'],
+                        'resource-mapping': parameters.get('resource-mapping', {})
+                    }
+                },
+                {
+                    'run': 'stream_remote_resources'
+                },
+                {
+                    'run': 'set_types'
+                },
+                {
+                    'run': 'aws.dump.to_s3',
+                    'parameters': {
+                        'bucket': os.environ['PKGSTORE_BUCKET'],
+                        'path': '{}/latest'.format(pipeline_id)
                     }
                 }
             ]
