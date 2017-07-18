@@ -27,7 +27,7 @@ class Generator(GeneratorBase):
     @classmethod
     def generate_pipeline(cls, source):
         meta = source['meta']
-        pipeline_id = '{owner}/{id}'.format(**meta)
+        pipeline_id = '{owner}/{dataset}'.format(**meta)
 
         inputs = source.get('inputs', [])
         assert len(inputs) == 1, 'Only supporting one input atm'
