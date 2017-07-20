@@ -10,10 +10,10 @@ def modify_datapackage(dp, parameters, stats):
         descriptor = res.descriptor
         name = descriptor['name']
         if name in resource_mapping:
-            assert 'path' in descriptor
-            descriptor['url'] = resource_mapping[name]
-            del descriptor['path']
-        dp['resources'].append(descriptor)
+            if parameters['tabular'] == ('schema' in descriptor):
+                assert 'path' in descriptor
+                descriptor['url'] = resource_mapping[name]
+                dp['resources'].append(descriptor)
     return dp
 
 process(modify_datapackage=modify_datapackage)

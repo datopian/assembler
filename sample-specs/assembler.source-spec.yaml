@@ -1,6 +1,6 @@
 meta: 
   owner: cd511289b5773fff5e7efe328846eef3
-  id: just-an-id
+  dataset: just-an-id
 inputs:
   - 
     kind: datapackage
@@ -8,6 +8,7 @@ inputs:
     parameters:
       resource-mapping:
         sample-resource: ./datapackages/sample.csv
+        readme: ./datapackages/readme.txt
 outputs:
   -
     kind: datapackage

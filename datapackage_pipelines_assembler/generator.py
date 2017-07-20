@@ -49,6 +49,7 @@ class Generator(GeneratorBase):
                     'run': 'assembler.load_modified_resources',
                     'parameters': {
                         'url': input['url'],
+                        'tabular': True,
                         'resource-mapping': parameters.get('resource-mapping', {})
                     }
                 },
@@ -57,6 +58,14 @@ class Generator(GeneratorBase):
                 },
                 {
                     'run': 'set_types'
+                },
+                {
+                    'run': 'assembler.load_modified_resources',
+                    'parameters': {
+                        'url': input['url'],
+                        'tabular': False,
+                        'resource-mapping': parameters.get('resource-mapping', {})
+                    }
                 },
                 {
                     'run': 'aws.dump.to_s3',
