@@ -1,6 +1,7 @@
 import datapackage
 
 from datapackage_pipelines.wrapper import process
+from datapackage_pipelines.generators import slugify
 
 
 def modify_datapackage(dp, parameters, stats):
@@ -12,6 +13,8 @@ def modify_datapackage(dp, parameters, stats):
         if name in resource_mapping:
             if parameters['tabular'] == ('schema' in descriptor):
                 assert 'path' in descriptor
+                if 'name' not in descriptor:
+                    descriptor['name'] = slugify(descriptor['path'], to_lower=True, separator='_')
                 descriptor['url'] = resource_mapping[name]
                 if descriptor['url'].startswith('http'):
                     # We append the path so that format guessing works
