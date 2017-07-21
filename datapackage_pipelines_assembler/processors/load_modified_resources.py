@@ -8,7 +8,7 @@ def modify_datapackage(dp, parameters, stats):
     remote_dp = datapackage.DataPackage(parameters['url'])
     for res in remote_dp.resources:
         descriptor = res.descriptor
-        name = descriptor['name']
+        name = descriptor.get('name', descriptor.get('path'))
         if name in resource_mapping:
             if parameters['tabular'] == ('schema' in descriptor):
                 assert 'path' in descriptor
