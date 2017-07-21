@@ -70,6 +70,7 @@ class Generator(GeneratorBase):
                 {
                     'run': 'aws.dump.to_s3',
                     'parameters': {
+                        'force-format': False,
                         'bucket': os.environ['PKGSTORE_BUCKET'],
                         'path': '{}/latest'.format(pipeline_id)
                     }
