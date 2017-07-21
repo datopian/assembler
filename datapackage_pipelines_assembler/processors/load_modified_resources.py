@@ -1,3 +1,5 @@
+import os
+
 import datapackage
 
 from datapackage_pipelines.wrapper import process
@@ -15,10 +17,10 @@ def modify_datapackage(dp, parameters, stats):
                 assert 'path' in descriptor
                 if 'name' not in descriptor:
                     descriptor['name'] = slugify(descriptor['path'], to_lower=True, separator='_')
+                _, extension = os.path.splitext(descriptor['path'])
+                if extension and 'format' not in descriptor:
+                    descriptor['format'] = extension[1:]
                 descriptor['url'] = resource_mapping[name]
-                if descriptor['url'].startswith('http'):
-                    # We append the path so that format guessing works
-                    descriptor['url'] += '#{}'.format(descriptor['path'])
                 dp['resources'].append(descriptor)
     return dp
 
