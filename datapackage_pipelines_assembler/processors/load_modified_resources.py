@@ -44,11 +44,13 @@ def modify_datapackage(dp, parameters, stats):
                 for basepath, extension in SETTINGS[tabular_resource]:
                     descriptor_cp = copy.deepcopy(descriptor)
 
-                    # Fix path 
+                    # Fix path
                     descriptor_cp['path'] = os.path.join(basepath, descriptor_cp['path'])
                     if not descriptor_cp['path'].endswith(extension):
                         descriptor_cp['path'] += extension
 
+                    if extension:
+                        descriptor_cp['name'] += '_' + extension
                     dp['resources'].append(descriptor_cp)
     return dp
 
