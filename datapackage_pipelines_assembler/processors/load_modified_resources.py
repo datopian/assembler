@@ -9,11 +9,11 @@ from datapackage_pipelines.generators import slugify
 
 SETTINGS = {
     True: [
-        ('', ''),
-        ('.datahub/json', '.json'),
+        ('', '', 0),
+        ('.datahub/json', '.json', 2),
     ],
     False: [
-        ('', '')
+        ('', '', 1)
     ]
 }
 
@@ -21,7 +21,8 @@ SETTINGS = {
 def modify_datapackage(dp, parameters, stats):
     resource_mapping = parameters['resource-mapping']
     remote_dp = datapackage.DataPackage(parameters['url'])
-    for res in remote_dp.resources:
+    resources = []
+    for i, res in enumerate(remote_dp.resources):
         descriptor = res.descriptor
         name = descriptor.get('name', descriptor.get('path'))
         if name in resource_mapping:
@@ -41,7 +42,7 @@ def modify_datapackage(dp, parameters, stats):
                 # Set url from mapping
                 descriptor['url'] = resource_mapping[name]
 
-                for basepath, extension in SETTINGS[tabular_resource]:
+                for basepath, extension, order in SETTINGS[tabular_resource]:
                     descriptor_cp = copy.deepcopy(descriptor)
 
                     # Fix path
@@ -51,7 +52,15 @@ def modify_datapackage(dp, parameters, stats):
 
                     if extension:
                         descriptor_cp['name'] += '_' + extension
-                    dp['resources'].append(descriptor_cp)
+                    resources.append(((order, i), descriptor_cp))
+    resources = list(
+        map(
+            lambda t: t[1],
+            sorted(resources,
+                   key=lambda t: t[0])
+            )
+    )
+    dp['resources'] = resources
     return dp
 
 process(modify_datapackage=modify_datapackage)
