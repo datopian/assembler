@@ -9,8 +9,8 @@ from datapackage_pipelines.generators import slugify
 
 SETTINGS = {
     True: [
+        ('', ''),
         ('.datahub/json', '.json'),
-        ('', '')
     ],
     False: [
         ('', '')
