@@ -60,7 +60,7 @@ def modify_datapackage(dp, parameters, stats):
                    key=lambda t: t[0])
             )
     )
-    dp['resources'] = resources
+    dp['resources'].extend(resources)
     return dp
 
 process(modify_datapackage=modify_datapackage)
