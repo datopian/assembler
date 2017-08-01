@@ -6,7 +6,6 @@ from datapackage_pipelines.utilities.extended_json import json
 from datapackage_pipelines.wrapper import spew, ingest
 
 parameters, datapackage, res_iter = ingest()
-res_name = parameters.get('resource', datapackage['resources'][0]['name'])
 
 
 def show_sample(res):
@@ -22,11 +21,7 @@ def show_sample(res):
 
 def process_resources(res_iter_):
     for res in res_iter_:
-        logging.info('? from %s', res.spec['name'])
-        if res.spec['name'] == res_name:
-            yield show_sample(res)
-        else:
-            yield res
+        yield show_sample(res)
 
 
 logging.info(json.dumps(datapackage, indent=2))
