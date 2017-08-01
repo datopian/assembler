@@ -1,12 +1,8 @@
 import os
 import json
-import pkgutil
 
 from datapackage_pipelines.generators import (
     GeneratorBase,
-    steps,
-    slugify,
-    SCHEDULE_DAILY
 )
 
 import logging
@@ -29,6 +25,10 @@ class Generator(GeneratorBase):
         meta = source['meta']
         pipeline_id = '{owner}/{dataset}'.format(**meta)
 
+        ownerid = meta['owner']
+        owner = meta.get('username')
+        findability = meta.get('findability', 'published'),
+
         inputs = source.get('inputs', [])
         assert len(inputs) == 1, 'Only supporting one input atm'
 
@@ -46,10 +46,22 @@ class Generator(GeneratorBase):
                     }
                 },
                 {
+                    'run': 'assembler.update_metadata',
+                    'parameters': {
+                        'ownerid': ownerid,
+                        'owner': owner,
+                        'findability': findability,
+                        'stats': {
+                            'rowcount': 0,
+                            'bytes': 0,
+                        }
+                    }
+                },
+                {
                     'run': 'assembler.load_modified_resources',
                     'parameters': {
                         'url': input['url'],
-                        'tabular': True,
+                        'action': 'derived',
                         'resource-mapping': parameters.get('resource-mapping', {})
                     }
                 },
@@ -60,19 +72,46 @@ class Generator(GeneratorBase):
                     'run': 'set_types'
                 },
                 {
+                    'run': 'assembler.sample'
+                },
+                {
                     'run': 'assembler.load_modified_resources',
                     'parameters': {
                         'url': input['url'],
-                        'tabular': False,
+                        'action': 'others',
                         'resource-mapping': parameters.get('resource-mapping', {})
                     }
                 },
+                # {
+                #     'run': 'dump.to_path',
+                #     'parameters': {
+                #         'force-format': False,
+                #         'handle-non-tabular': True,
+                #         'out-path': './out',
+                #         'counters': {
+                #             "datapackage-rowcount": "datahub.stats.rowcount",
+                #             "datapackage-bytes": "datahub.stats.bytes",
+                #             "datapackage-hash": "datahub.hash",
+                #             "resource-rowcount": "rowcount",
+                #         }
+                #
+                #     }
+                # },
                 {
                     'run': 'aws.dump.to_s3',
                     'parameters': {
                         'force-format': False,
+                        'handle-non-tabular': True,
                         'bucket': os.environ['PKGSTORE_BUCKET'],
-                        'path': '{}/latest'.format(pipeline_id)
+                        'path': '{}/latest'.format(pipeline_id),
+                        'counters': {
+                            "datapackage-rowcount": "datahub.stats.rowcount",
+                            "datapackage-bytes": "datahub.stats.bytes",
+                            "datapackage-hash": "datahub.hash",
+                            "resource-rowcount": "rowcount",
+                            "resource-bytes": "bytes",
+                            "resource-hash": "hash",
+                        }
                     }
                 }
             ]
