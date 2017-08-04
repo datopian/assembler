@@ -54,7 +54,8 @@ class Generator(GeneratorBase):
                         'stats': {
                             'rowcount': 0,
                             'bytes': 0,
-                        }
+                        },
+                        'id': pipeline_id
                     }
                 },
                 {
@@ -113,6 +114,22 @@ class Generator(GeneratorBase):
                             "resource-hash": "hash",
                         }
                     }
-                }
+                },
+                {
+                    'run': 'assembler.add_indexing_resource'
+                },
+                {
+                    'run': 'elasticsearch.dump.to_index',
+                    'parameters': {
+                        'indexes': {
+                            'datasets': [
+                                {
+                                    'resource-name': 'datasets',
+                                    'doc-type': 'dataset'
+                                }
+                            ]
+                        }
+                    }
+                },
             ]
         }

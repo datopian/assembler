@@ -19,6 +19,7 @@ PACKAGE = 'datapackage_pipelines_assembler'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage-pipelines',
+    'datapackage-pipelines-elasticsearch',
     'psycopg2',
     'tweepy',
     'facebook-sdk',
