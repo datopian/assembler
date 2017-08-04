@@ -27,7 +27,7 @@ class Generator(GeneratorBase):
 
         ownerid = meta['owner']
         owner = meta.get('username')
-        findability = meta.get('findability', 'published'),
+        findability = meta.get('findability', 'published')
 
         inputs = source.get('inputs', [])
         assert len(inputs) == 1, 'Only supporting one input atm'
