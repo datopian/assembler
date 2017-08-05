@@ -4,7 +4,7 @@ import json
 from datapackage_pipelines.generators import (
     GeneratorBase,
 )
-from .processors.add_indexing_resource import create_index
+from .processors.dump_to_s3 import create_index
 
 import logging
 log = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ class Generator(GeneratorBase):
                 #     }
                 # },
                 {
-                    'run': 'aws.dump.to_s3',
+                    'run': 'assembler.dump_to_s3',
                     'parameters': {
                         'force-format': False,
                         'handle-non-tabular': True,
@@ -121,9 +121,6 @@ class Generator(GeneratorBase):
                             "resource-hash": "hash",
                         }
                     }
-                },
-                {
-                    'run': 'assembler.add_indexing_resource'
                 },
                 {
                     'run': 'elasticsearch.dump.to_index',

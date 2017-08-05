@@ -1,8 +1,11 @@
 import itertools
 
+import copy
 from tableschema_elasticsearch import Storage
 
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_aws.processors.dump.to_s3 import S3Dumper
+
 
 SCHEMA = {
     'fields': [
@@ -50,11 +53,22 @@ def dataset_resource(dp):
             'datahub'
         ]
     )
+    dp = copy.deepcopy(dp)
+    dp['resources'].pop()
     ret['datapackage'] = dp
     yield ret
 
 
+class MyS3Dumper(S3Dumper):
+    
+    def prepare_datapackage(self, datapackage, params):
+        datapackage = super(MyS3Dumper, self).prepare_datapackage(datapackage, params)
+        return modify_datapackage(datapackage)
+
+    def handle_resources(self, datapackage, resource_iterator, parameters, stats):
+        yield from super(MyS3Dumper, self).handle_resources(datapackage, resource_iterator, parameters, stats)
+        yield dataset_resource(datapackage)
+
+
 if __name__ == "__main__":
-    parameters, dp, res_iter = ingest()
-    spew(modify_datapackage(dp),
-         itertools.chain(res_iter, [dataset_resource(dp)]))
+    MyS3Dumper()()
