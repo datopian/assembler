@@ -122,9 +122,9 @@ class Generator(GeneratorBase):
                     'run': 'elasticsearch.dump.to_index',
                     'parameters': {
                         'indexes': {
-                            'datasets': [
+                            'datahub': [
                                 {
-                                    'resource-name': 'datasets',
+                                    'resource-name': '__datasets',
                                     'doc-type': 'dataset'
                                 }
                             ]

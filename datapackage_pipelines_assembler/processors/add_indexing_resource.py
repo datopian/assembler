@@ -11,7 +11,7 @@ parameters, dp, res_iter = ingest()
 
 def modify_datapackage(dp):
     dp['resources'].append({
-        'name': 'datasets',
+        'name': '__datasets',
         'path': 'nonexistent',
         'schema': {
             'fields': [
@@ -19,8 +19,7 @@ def modify_datapackage(dp):
                 {'name': 'name', 'type': 'string'},
                 {'name': 'title', 'type': 'string'},
                 {'name': 'description', 'type': 'string'},
-                {'name': 'resources', 'type': 'array',
-                 'es:itemType': 'object', 'es:index': False},
+                {'name': 'datapackage', 'type': 'object', 'es:index': False},
                 {'name': 'datahub', 'type': 'object',
                  'es:schema': {
                     'fields': [
@@ -37,7 +36,18 @@ def modify_datapackage(dp):
 
 
 def dataset_resource(dp):
-    yield dp
+    ret = dict(
+        (k, dp.get(k))
+        for k in [
+            'id',
+            'name',
+            'title',
+            'description',
+            'datahub'
+        ]
+    )
+    ret['datapackage'] = dp
+    yield ret
 
 
 spew(modify_datapackage(dp),
