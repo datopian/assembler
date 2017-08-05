@@ -4,6 +4,7 @@ import json
 from datapackage_pipelines.generators import (
     GeneratorBase,
 )
+from .processors.add_indexing_resource import create_index
 
 import logging
 log = logging.getLogger(__name__)
@@ -24,6 +25,9 @@ class Generator(GeneratorBase):
     def generate_pipeline(cls, source):
         meta = source['meta']
         pipeline_id = '{owner}/{dataset}'.format(**meta)
+
+        if pipeline_id == 'init/init':
+            create_index('datahub')
 
         ownerid = meta['owner']
         owner = meta.get('username')
@@ -133,3 +137,6 @@ class Generator(GeneratorBase):
                 },
             ]
         }
+
+
+create_index('datahub')

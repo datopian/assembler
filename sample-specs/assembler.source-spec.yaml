@@ -1,6 +1,6 @@
 meta: 
-  owner: cd511289b5773fff5e7efe328846eef3
-  dataset: just-an-id
+  owner: init
+  dataset: init
 inputs:
   - 
     kind: datapackage
