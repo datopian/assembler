@@ -4,7 +4,7 @@ import copy
 from tableschema_elasticsearch import Storage
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines_aws.processors.dump.to_s3 import S3Dumper
+from datapackage_pipelines_aws.s3_dumper import S3Dumper
 
 
 SCHEMA = {
