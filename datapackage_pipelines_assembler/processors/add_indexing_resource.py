@@ -24,8 +24,6 @@ SCHEMA = {
     'primaryKey': ['id']
 }
 
-parameters, dp, res_iter = ingest()
-
 
 def create_index(index_name):
     storage = Storage()
@@ -56,5 +54,7 @@ def dataset_resource(dp):
     yield ret
 
 
-spew(modify_datapackage(dp),
-     itertools.chain(res_iter, [dataset_resource(dp)]))
+if __name__ == "__main__":
+    parameters, dp, res_iter = ingest()
+    spew(modify_datapackage(dp),
+         itertools.chain(res_iter, [dataset_resource(dp)]))

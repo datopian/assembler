@@ -26,8 +26,11 @@ class Generator(GeneratorBase):
         meta = source['meta']
         pipeline_id = '{owner}/{dataset}'.format(**meta)
 
-        if pipeline_id == 'init/init':
-            create_index('datahub')
+        try:
+            if pipeline_id == 'init/init':
+                create_index('datahub')
+        except:
+            logging.exception('Failed to create index')
 
         ownerid = meta['owner']
         owner = meta.get('username')
@@ -137,6 +140,3 @@ class Generator(GeneratorBase):
                 },
             ]
         }
-
-
-create_index('datahub')
