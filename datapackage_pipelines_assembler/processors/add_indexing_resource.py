@@ -16,6 +16,7 @@ SCHEMA = {
              'fields': [
                  {'name': 'owner', 'type': 'string'},
                  {'name': 'ownerid', 'type': 'string'},
+                 {'name': 'findability', 'type': 'string'},
              ]
          }
          },
