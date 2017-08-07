@@ -37,6 +37,7 @@ class Generator(GeneratorBase):
         ownerid = meta['ownerid']
         owner = meta.get('owner')
         findability = meta.get('findability', 'published')
+        updated_at = meta.get('update_time')
 
         inputs = source.get('inputs', [])
         assert len(inputs) == 1, 'Only supporting one input atm'
@@ -47,6 +48,7 @@ class Generator(GeneratorBase):
         parameters = input.get('parameters', {})
 
         yield pipeline_id, {
+            'update_time': updated_at,
             'pipeline': [
                 {
                     'run': 'load_metadata',
