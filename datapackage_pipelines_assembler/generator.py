@@ -24,16 +24,18 @@ class Generator(GeneratorBase):
     @classmethod
     def generate_pipeline(cls, source):
         meta = source['meta']
-        pipeline_id = '{owner}/{dataset}'.format(**meta)
+        pipeline_id = '{ownerid}/{dataset}'.format(**meta)
 
         try:
-            if pipeline_id == 'init/init':
-                create_index('datahub')
+            # if pipeline_id == 'init/init':
+            #     create_index('datahub')
+            pass
         except:
-            logging.exception('Failed to create index')
+            #logging.exception('Failed to create index')
+            pass
 
-        ownerid = meta['owner']
-        owner = meta.get('username')
+        ownerid = meta['ownerid']
+        owner = meta.get('owner')
         findability = meta.get('findability', 'published')
 
         inputs = source.get('inputs', [])

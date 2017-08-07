@@ -6,7 +6,7 @@
       "type": "object",
       "properties": {
         "owner": {"type": "string"},
-        "username": {"type": "string"},
+        "ownerid": {"type": "string"},
         "dataset": {"type": "string"},
         "version": {"type": "integer"}
       }
