@@ -5,7 +5,7 @@
     "meta": {
       "type": "object",
       "properties": {
-        "owner": {"type": "string"},
+        "owner": {"type": ["string", "null"]},
         "ownerid": {"type": "string"},
         "dataset": {"type": "string"},
         "version": {"type": "integer"}
