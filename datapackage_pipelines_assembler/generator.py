@@ -66,7 +66,7 @@ class Generator(GeneratorBase):
                             'rowcount': 0,
                             'bytes': 0,
                         },
-                        'update_time': update_time,
+                        'modified': update_time,
                         'id': pipeline_id
                     }
                 },
