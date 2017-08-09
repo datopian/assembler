@@ -27,7 +27,15 @@ def modify_datapackage(dp, parameters, stats):
                 (descriptor.get('format') == 'geojson') or
                 (descriptor.get('path', '').endswith('.geojson'))
             )
-            tabular_resource = ('schema' in descriptor)
+
+            # Hacky way to handle geojson files atm
+            if is_geojson:
+                schema = descriptor.get('schema')
+                if schema is not None:
+                    del descriptor['schema']
+                    descriptor['geojsonSchema'] = schema
+
+            tabular_resource = 'schema' in descriptor
 
             assert 'path' in descriptor
 
@@ -38,7 +46,7 @@ def modify_datapackage(dp, parameters, stats):
             # Set url from mapping
             descriptor['url'] = resource_mapping[name]
 
-            if action == 'derived' and tabular_resource and not is_geojson:
+            if action == 'derived' and tabular_resource:
                 # Add format if missing
                 base, extension = os.path.splitext(descriptor['path'])
                 extension = extension[1:]
