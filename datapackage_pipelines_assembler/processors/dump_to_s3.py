@@ -65,6 +65,11 @@ class MyS3Dumper(S3Dumper):
         datapackage = super(MyS3Dumper, self).prepare_datapackage(datapackage, params)
         return modify_datapackage(datapackage)
 
+    def handle_datapackage(self, datapackage, parameters, stats):
+        dp = copy.deepcopy(datapackage)
+        dp['resources'].pop()
+        return super(MyS3Dumper, self).handle_datapackage(dp, parameters, stats)
+
     def handle_resources(self, datapackage, resource_iterator, parameters, stats):
         yield from super(MyS3Dumper, self).handle_resources(datapackage, resource_iterator, parameters, stats)
         yield dataset_resource(datapackage)
