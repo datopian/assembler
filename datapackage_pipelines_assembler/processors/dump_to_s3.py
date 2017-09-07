@@ -20,6 +20,17 @@ SCHEMA = {
                  {'name': 'owner', 'type': 'string'},
                  {'name': 'ownerid', 'type': 'string'},
                  {'name': 'findability', 'type': 'string'},
+                 {'name': 'stats', 'type': 'object', 'properties': {
+                        'rowcount': {
+                            'type': 'integer',
+                            'index': 'not_analyzed'
+                        },
+                        'bytes': {
+                            'type': 'integer',
+                            'index': 'not_analyzed'
+                        }
+                    }
+                }
              ]
          }
          },
@@ -60,7 +71,7 @@ def dataset_resource(dp):
 
 
 class MyS3Dumper(S3Dumper):
-    
+
     def prepare_datapackage(self, datapackage, params):
         datapackage = super(MyS3Dumper, self).prepare_datapackage(datapackage, params)
         return modify_datapackage(datapackage)
