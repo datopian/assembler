@@ -20,16 +20,11 @@ SCHEMA = {
                  {'name': 'owner', 'type': 'string'},
                  {'name': 'ownerid', 'type': 'string'},
                  {'name': 'findability', 'type': 'string'},
-                 {'name': 'stats', 'type': 'object', 'properties': {
-                        'rowcount': {
-                            'type': 'integer',
-                            'index': 'not_analyzed'
-                        },
-                        'bytes': {
-                            'type': 'integer',
-                            'index': 'not_analyzed'
-                        }
-                    }
+                 {'name': 'stats', 'type': 'object', 'es:schema': {
+                    'fields': [
+                        {'name': 'rowcount', 'type': 'integer'},
+                        {'name': 'bytes', 'type': 'integer'}
+                    ]}
                 }
              ]
          }
