@@ -3,7 +3,7 @@ FROM frictionlessdata/datapackage-pipelines:latest
 ADD . /app
 
 WORKDIR /app
-RUN pip install .
+RUN pip install . "rfc3986<1.0"
 RUN apk add --update postgresql-client
 
 CMD ["server"]
