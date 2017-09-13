@@ -1,6 +1,6 @@
 meta: 
-  ownerid: init
-  dataset: init
+  ownerid: dummyowner
+  dataset: dummydataset
 inputs:
   - 
     kind: datapackage

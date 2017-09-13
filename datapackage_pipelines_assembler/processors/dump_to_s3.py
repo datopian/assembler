@@ -1,6 +1,8 @@
 import itertools
 
 import copy
+
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from tableschema_elasticsearch import Storage
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -42,6 +44,7 @@ def create_index(index_name):
 def modify_datapackage(dp):
     dp['resources'].append({
         'name': '__datasets',
+        PROP_STREAMING: True,
         'path': 'nonexistent',
         'schema': SCHEMA
     })
