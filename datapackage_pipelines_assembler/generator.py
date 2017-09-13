@@ -56,7 +56,7 @@ def s3_path(*parts):
         path = '/'.join(str(p) for p in parts)
         return path
     else:
-        path = '/'.join(str(p) for p in parts),
+        path = '/'.join(str(p) for p in parts)
         bucket = os.environ['PKGSTORE_BUCKET']
         return 'https://{}/{}'.format(bucket, path)
 
