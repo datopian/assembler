@@ -5,6 +5,7 @@ from typing import Tuple
 import datapackage
 from copy import deepcopy
 from datapackage import Resource
+from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact
@@ -20,9 +21,11 @@ def planner(datapackage_input, processing):
         resource_info = []
         dp = datapackage.DataPackage(datapackage_url)
         for resource in dp.resources:  # type: Resource
+            resource.descriptor['url'] = resource.source
             resource_info.append(deepcopy(resource.descriptor))
 
     # print('PLAN resource_info', resource_info)
+
     # Add types for all resources
     resource_mapping = parameters.get('resource-mapping', {})
     # print('PLAN resource_mapping', resource_mapping)
@@ -31,12 +34,17 @@ def planner(datapackage_input, processing):
         name = descriptor['name']
         mapping = resource_mapping.get(path, resource_mapping.get(name))
         if mapping is not None:
+            base, extension = os.path.splitext(PROP_STREAMED_FROM)
+            extension = extension[1:]
+            if extension and 'format' not in descriptor:
+                descriptor['format'] = extension
+                if not descriptor['url'].endswith(extension):
+                    descriptor['url'] += '#.{}'.format(extension)
             descriptor['url'] = mapping
-            # descriptor['path'] = os.path.basename(path)
 
         is_geojson = (
             (descriptor.get('format') == 'geojson') or
-            (descriptor.get('path', '').endswith('.geojson'))
+            (descriptor['url'].endswith('.geojson'))
         )
 
         # Hacky way to handle geojson files atm
