@@ -27,7 +27,10 @@ def modify_datapackage(dp, parameters, stats):
             resource : Resource = resource_
             descriptor = copy.deepcopy(resource.descriptor)
             source = resource.source
-            descriptor[PROP_STREAMED_FROM] = source
+            if os.environ.get('ASSEMBLER_LOCAL'):
+                descriptor[PROP_STREAMED_FROM] = source
+            else:
+                descriptor['path'] = source
             if PROP_STREAMING in descriptor:
                 del descriptor[PROP_STREAMING]
             dp['resources'].append(descriptor)
