@@ -38,8 +38,9 @@ def planner(datapackage_input, processing):
             extension = extension[1:]
             if extension and 'format' not in descriptor:
                 descriptor['format'] = extension
-            if not descriptor['url'].endswith(descriptor['format']):
-                descriptor['url'] += '#.{}'.format(descriptor['format'])
+            if 'format' in descriptor:
+                if not descriptor['url'].endswith(descriptor['format']):
+                    descriptor['url'] += '#.{}'.format(descriptor['format'])
             descriptor['url'] = mapping
 
         is_geojson = (
