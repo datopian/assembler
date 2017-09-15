@@ -34,7 +34,7 @@ def planner(datapackage_input, processing):
         name = descriptor['name']
         mapping = resource_mapping.get(path, resource_mapping.get(name))
         if mapping is not None:
-            base, extension = os.path.splitext(PROP_STREAMED_FROM)
+            base, extension = os.path.splitext(descriptor['url'])
             extension = extension[1:]
             if extension and 'format' not in descriptor:
                 descriptor['format'] = extension
