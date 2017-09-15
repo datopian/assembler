@@ -32,18 +32,25 @@ def planner(datapackage_input, processing):
     for descriptor in resource_info:
         path = descriptor['path']
         name = descriptor['name']
-        mapping = resource_mapping.get(path, resource_mapping.get(name))
-        if mapping is not None:
-            descriptor['url'] = mapping
 
+        # Extract format from original path
         base, extension = os.path.splitext(descriptor['url'])
         extension = extension[1:]
         if extension and 'format' not in descriptor:
             descriptor['format'] = extension
 
+        # Map original path if needed
+        mapping = resource_mapping.get(path, resource_mapping.get(name))
+        if mapping is not None:
+            descriptor['url'] = mapping
+
+        # Augment url with format hint
         if 'format' in descriptor:
             if not descriptor['url'].endswith(descriptor['format']):
                 descriptor['url'] += '#.{}'.format(descriptor['format'])
+
+        print(descriptor['url'])
+        print(descriptor['format'])
 
         is_geojson = (
             (descriptor.get('format') == 'geojson') or
