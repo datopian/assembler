@@ -109,7 +109,7 @@ class Generator(GeneratorBase):
             yield inner_pipeline_id, pipeline
 
         dependencies = [dict(pipeline='./'+pid) for pid in inner_pipeline_ids]
-        print(dependencies)
+        # print(dependencies)
         final_steps = [
             ('load_metadata',
              {
