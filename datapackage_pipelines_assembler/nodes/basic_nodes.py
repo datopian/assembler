@@ -3,7 +3,7 @@ from .base_processing_node import BaseProcessingNode, ProcessingArtifact
 
 class DerivedFormatProcessingNode(BaseProcessingNode):
     def __init__(self, available_artifacts, fmt):
-        super(DerivedFormatProcessingNode, self).__init__(available_artifacts)
+        super(DerivedFormatProcessingNode, self).__init__(available_artifacts, [])
         self.fmt = fmt
 
     def get_artifacts(self):
@@ -35,17 +35,17 @@ class DerivedFormatProcessingNode(BaseProcessingNode):
 
 
 class DerivedCSVProcessingNode(DerivedFormatProcessingNode):
-    def __init__(self, available_artifacts):
+    def __init__(self, available_artifacts, _):
         super(DerivedCSVProcessingNode, self).__init__(available_artifacts, 'csv')
 
 
 class DerivedJSONProcessingNode(DerivedFormatProcessingNode):
-    def __init__(self, available_artifacts):
+    def __init__(self, available_artifacts, _):
         super(DerivedJSONProcessingNode, self).__init__(available_artifacts, 'json')
 
 
 class NonTabularProcessingNode(BaseProcessingNode):
-    def __init__(self, available_artifacts):
+    def __init__(self, available_artifacts, _):
         super(NonTabularProcessingNode, self).__init__(available_artifacts)
 
     def get_artifacts(self):

@@ -8,8 +8,8 @@ ORDERED_NODE_CLASSES = [
 ]
 
 
-def collect_artifacts(artifacts):
+def collect_artifacts(artifacts, outputs):
     for cls in ORDERED_NODE_CLASSES:
-        node = cls(artifacts)
+        node = cls(artifacts, outputs)
         yield from node.get_artifacts()
 

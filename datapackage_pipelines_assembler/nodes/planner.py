@@ -5,13 +5,12 @@ from typing import Tuple
 import datapackage
 from copy import deepcopy
 from datapackage import Resource
-from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact
 
 
-def planner(datapackage_input, processing):
+def planner(datapackage_input, processing, outputs):
     parameters = datapackage_input.get('parameters')
     datapackage_url = datapackage_input['url']
     resource_info = datapackage_input.get('resource_info')
@@ -23,6 +22,14 @@ def planner(datapackage_input, processing):
         for resource in dp.resources:  # type: Resource
             resource.descriptor['url'] = resource.source
             resource_info.append(deepcopy(resource.descriptor))
+    else:
+        for descriptor in resource_info:
+            path = descriptor['path']
+            if path.startswith('http'):
+                url = path
+            else:
+                url = os.path.join(os.path.dirname(datapackage_url), path)
+            descriptor['url'] = url
 
     # print('PLAN resource_info', resource_info)
 
@@ -110,7 +117,7 @@ def planner(datapackage_input, processing):
         for ri in resource_info.values()
     ]
 
-    for derived_artifact in collect_artifacts(artifacts):
+    for derived_artifact in collect_artifacts(artifacts, outputs):
         pipeline_steps : List[Tuple] = [
             ('add_metadata', {'name': derived_artifact.resource_name}),
         ]

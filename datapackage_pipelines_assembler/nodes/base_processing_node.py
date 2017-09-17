@@ -18,8 +18,11 @@ class ProcessingArtifact():
 
 
 class BaseProcessingNode():
-    def __init__(self, available_artifacts : List[ProcessingArtifact]):
+    def __init__(self,
+                 available_artifacts : List[ProcessingArtifact],
+                 outputs):
         self.available_artifacts = available_artifacts
+        self.outputs = outputs
 
     def get_artifacts(self):
         raise NotImplemented()

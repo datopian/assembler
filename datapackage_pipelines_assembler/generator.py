@@ -92,7 +92,9 @@ class Generator(GeneratorBase):
         urls = []
         inner_pipeline_ids = []
         for inner_pipeline_id, pipeline_steps, dependencies \
-                in planner(input, source.get('processing', [])):
+                in planner(input,
+                           source.get('processing', []),
+                           source.get('outputs', [])):
             inner_pipeline_id = pipeline_id(inner_pipeline_id)
             inner_pipeline_ids.append(inner_pipeline_id)
 
