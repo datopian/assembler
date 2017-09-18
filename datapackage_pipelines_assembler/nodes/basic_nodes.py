@@ -45,8 +45,8 @@ class DerivedJSONProcessingNode(DerivedFormatProcessingNode):
 
 
 class NonTabularProcessingNode(BaseProcessingNode):
-    def __init__(self, available_artifacts, _):
-        super(NonTabularProcessingNode, self).__init__(available_artifacts)
+    def __init__(self, available_artifacts, outputs):
+        super(NonTabularProcessingNode, self).__init__(available_artifacts, outputs)
 
     def get_artifacts(self):
         output = ProcessingArtifact(
