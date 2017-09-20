@@ -10,6 +10,9 @@ from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact
 
 
+datapackage_cache = {}
+
+
 def planner(datapackage_input, processing, outputs):
     parameters = datapackage_input.get('parameters')
     datapackage_url = datapackage_input['url']
@@ -17,11 +20,14 @@ def planner(datapackage_input, processing, outputs):
 
     # Create resource_info if missing
     if resource_info is None:
-        resource_info = []
-        dp = datapackage.DataPackage(datapackage_url)
-        for resource in dp.resources:  # type: Resource
-            resource.descriptor['url'] = resource.source
-            resource_info.append(deepcopy(resource.descriptor))
+        if datapackage_url not in datapackage_cache:
+            resource_info = []
+            dp = datapackage.DataPackage(datapackage_url)
+            for resource in dp.resources:  # type: Resource
+                resource.descriptor['url'] = resource.source
+                resource_info.append(deepcopy(resource.descriptor))
+            datapackage_cache[datapackage_url] = resource_info
+        resource_info = datapackage_cache[datapackage_url]
     else:
         for descriptor in resource_info:
             path = descriptor['path']
