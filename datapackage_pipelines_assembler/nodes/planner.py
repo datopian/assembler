@@ -13,7 +13,7 @@ from .base_processing_node import ProcessingArtifact
 def planner(datapackage_input, processing, outputs):
     parameters = datapackage_input.get('parameters')
     datapackage_url = datapackage_input['url']
-    resource_info = datapackage_input.get('resource_info')
+    resource_info = datapackage_input.get('resource-info')
 
     # Create resource_info if missing
     if resource_info is None:
