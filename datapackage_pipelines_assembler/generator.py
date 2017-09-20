@@ -88,27 +88,32 @@ class Generator(GeneratorBase):
         input = inputs[0]
         assert input['kind'] == 'datapackage', 'Only supporting datapackage inputs atm'
 
-
         urls = []
         inner_pipeline_ids = []
-        for inner_pipeline_id, pipeline_steps, dependencies \
-                in planner(input,
-                           source.get('processing', []),
-                           source.get('outputs', [])):
-            inner_pipeline_id = pipeline_id(inner_pipeline_id)
-            inner_pipeline_ids.append(inner_pipeline_id)
 
-            urls.append(s3_path(inner_pipeline_id, 'datapackage.json'))
+        def planner_pipelines():
+            planner_gen = planner(input,
+                                  source.get('processing', []),
+                                  source.get('outputs', []))
+            datapackage_url = None
+            while True:
+                inner_pipeline_id, pipeline_steps, dependencies  = planner_gen.send(datapackage_url)
+                inner_pipeline_id = pipeline_id(inner_pipeline_id)
+                inner_pipeline_ids.append(inner_pipeline_id)
 
-            pipeline_steps.extend(dump_steps(inner_pipeline_id))
-            dependencies = [dict(pipeline=pipeline_id(r)) for r in dependencies]
+                datapackage_url = s3_path(inner_pipeline_id, 'datapackage.json')
+                urls.append(datapackage_url)
 
-            pipeline = {
-                'pipeline': steps(*pipeline_steps),
-                'dependencies': dependencies
-            }
-            # print('yielding', inner_pipeline_id, pipeline)
-            yield inner_pipeline_id, pipeline
+                pipeline_steps.extend(dump_steps(inner_pipeline_id))
+                dependencies = [dict(pipeline=pipeline_id(r)) for r in dependencies]
+
+                pipeline = {
+                    'pipeline': steps(*pipeline_steps),
+                    'dependencies': dependencies
+                }
+                yield inner_pipeline_id, pipeline
+
+        yield from planner_pipelines()
 
         dependencies = [dict(pipeline='./'+pid) for pid in inner_pipeline_ids]
         # print(dependencies)

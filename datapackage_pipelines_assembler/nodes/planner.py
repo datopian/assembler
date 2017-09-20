@@ -129,10 +129,16 @@ def planner(datapackage_input, processing, outputs):
         ]
         needs_streaming = False
         for required_artifact in derived_artifact.required_streamed_artifacts:
-            pipeline_steps.append(
-                ('add_resource', resource_info[required_artifact.resource_name])
-            )
-            needs_streaming = True
+            ri = resource_info[required_artifact.resource_name]
+            if 'resource' in ri:
+                pipeline_steps.append(
+                    ('load_resource', ri)
+                )
+            else:
+                pipeline_steps.append(
+                    ('add_resource', ri)
+                )
+                needs_streaming = True
 
         if needs_streaming:
             pipeline_steps.extend([
@@ -153,6 +159,10 @@ def planner(datapackage_input, processing, outputs):
                         for ra in (derived_artifact.required_streamed_artifacts +
                                    derived_artifact.required_other_artifacts)
                         if not ra.datahub_type in ('source/tabular', 'source/non-tabular')]
-        yield derived_artifact.resource_name, pipeline_steps, dependencies
+        datapackage_url = yield derived_artifact.resource_name, pipeline_steps, dependencies
 
+        resource_info[derived_artifact.resource_name] = {
+            'resource': derived_artifact.resource_name,
+            'url': datapackage_url
+        }
 
