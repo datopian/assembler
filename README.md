@@ -47,3 +47,15 @@ The pipelines' execution order is maintained by properly setting the dependencie
 An aggregating pipeline is also created that assembles the final package, based on all the
   separate intermediate packages. This aggregating datapackage does not need to process any
   data, as it copies resources with absolute URL paths (and not relative ones).
+
+### Environment variables
+
+Set of env variables needed to run assembler
+
+```
+AWS_ACCESS_KEY_ID=<<aWSsecREtKey>>
+AWS_SECRET_ACCESS_KEY=<<aWSsecREtACCesSKey>>
+DPP_ELASTICSEARCH=<<https://elastic-search-url.com>>
+PKGSTORE_BUCKET=<<s3.bucket.package.store>>
+SOURCESPEC_REGISTRY_DB_ENGINE<<postgresql://database.url:port/db_name>>
+```
