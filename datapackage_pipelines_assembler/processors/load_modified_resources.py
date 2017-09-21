@@ -1,4 +1,3 @@
-import json
 import os
 
 import copy
@@ -18,13 +17,16 @@ DERIVED_FORMATS = ['csv', 'json']
 def modify_datapackage(dp, parameters, stats):
 
     urls = parameters['urls']
+    views = dp.get('views', [])
 
     for url in urls:
         logging.info('URL: %s', url)
         dp_ = datapackage.DataPackage(url)
+        view = dp_.descriptor.get('views', [])
+        views += view
 
         for resource_ in dp_.resources:
-            resource : Resource = resource_
+            resource: Resource = resource_
             descriptor = copy.deepcopy(resource.descriptor)
             source = resource.source
             if os.environ.get('ASSEMBLER_LOCAL'):
@@ -34,6 +36,8 @@ def modify_datapackage(dp, parameters, stats):
             if PROP_STREAMING in descriptor:
                 del descriptor[PROP_STREAMING]
             dp['resources'].append(descriptor)
+
+    dp['views'] = views
 
     return dp
 

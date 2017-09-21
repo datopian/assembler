@@ -5,8 +5,8 @@ class ProcessingArtifact():
     def __init__(self,
                  datahub_type,
                  resource_name,
-                 required_streamed_artifacts : List['ProcessingArtifact'],
-                 required_other_artifacts : List['ProcessingArtifact'],
+                 required_streamed_artifacts: List['ProcessingArtifact'],
+                 required_other_artifacts: List['ProcessingArtifact'],
                  pipeline_steps,
                  streamable):
         self.datahub_type = datahub_type
@@ -19,11 +19,10 @@ class ProcessingArtifact():
 
 class BaseProcessingNode():
     def __init__(self,
-                 available_artifacts : List[ProcessingArtifact],
+                 available_artifacts: List[ProcessingArtifact],
                  outputs):
         self.available_artifacts = available_artifacts[:]
         self.outputs = outputs
 
     def get_artifacts(self):
         raise NotImplemented()
-

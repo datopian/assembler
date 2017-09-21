@@ -4,7 +4,6 @@ from typing import Tuple
 
 import datapackage
 from copy import deepcopy
-from datapackage import Resource
 
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact
@@ -124,7 +123,7 @@ def planner(datapackage_input, processing, outputs):
     ]
 
     for derived_artifact in collect_artifacts(artifacts, outputs):
-        pipeline_steps : List[Tuple] = [
+        pipeline_steps: List[Tuple] = [
             ('add_metadata', {'name': derived_artifact.resource_name}),
         ]
         needs_streaming = False
@@ -155,14 +154,13 @@ def planner(datapackage_input, processing, outputs):
         pipeline_steps.extend([
             ('assembler.sample',),
         ])
-        dependencies = ['./'+ra.resource_name
+        dependencies = [ra.resource_name
                         for ra in (derived_artifact.required_streamed_artifacts +
                                    derived_artifact.required_other_artifacts)
-                        if not ra.datahub_type in ('source/tabular', 'source/non-tabular')]
+                        if ra.datahub_type not in ('source/tabular', 'source/non-tabular')]
         datapackage_url = yield derived_artifact.resource_name, pipeline_steps, dependencies
 
         resource_info[derived_artifact.resource_name] = {
             'resource': derived_artifact.resource_name,
             'url': datapackage_url
         }
-

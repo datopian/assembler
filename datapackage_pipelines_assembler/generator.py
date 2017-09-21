@@ -6,7 +6,7 @@ from datapackage_pipelines.generators import (
 )
 from .nodes.planner import planner
 
-from .processors.dump_to_s3 import create_index
+from .processors.dump_to_s3 import create_index # noqa
 
 import logging
 log = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ class Generator(GeneratorBase):
                                   source.get('outputs', []))
             datapackage_url = None
             while True:
-                inner_pipeline_id, pipeline_steps, dependencies  = planner_gen.send(datapackage_url)
+                inner_pipeline_id, pipeline_steps, dependencies = planner_gen.send(datapackage_url)
                 inner_pipeline_id = pipeline_id(inner_pipeline_id)
                 inner_pipeline_ids.append(inner_pipeline_id)
 
@@ -105,7 +105,7 @@ class Generator(GeneratorBase):
                 urls.append(datapackage_url)
 
                 pipeline_steps.extend(dump_steps(inner_pipeline_id))
-                dependencies = [dict(pipeline=pipeline_id(r)) for r in dependencies]
+                dependencies = [dict(pipeline='./'+pipeline_id(r)) for r in dependencies]
 
                 pipeline = {
                     'pipeline': steps(*pipeline_steps),
