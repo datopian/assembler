@@ -1,5 +1,6 @@
 from .base_processing_node import BaseProcessingNode, ProcessingArtifact
 
+
 class DerivedPreviewProcessingNode(BaseProcessingNode):
     def __init__(self, available_artifacts, outputs):
         super(DerivedPreviewProcessingNode, self).__init__(available_artifacts, outputs)

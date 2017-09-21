@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/datahq/assembler.svg?branch=master)](https://travis-ci.org/datahq/assembler)
+
 # Assembler
 
 The factory floor on which everything is produced.
@@ -27,9 +29,9 @@ The `ProcessingArtifact` class represents a single such artifact. It holds:
 - Its dependencies:
   - Which artifacts are required to be streaming in the pipeline prior to processing
   - Which artifacts need to be present in the datapackage as non-streaming resources
-- The datapackage-pipelines steps that will generate the artifact and create that resource 
+- The datapackage-pipelines steps that will generate the artifact and create that resource
   the datapackage.
-  
+
 ### Under the hood
 Each of these artifacts is converted into a pipeline, which always has the following structure:
   - Create a new, empty datapackage
@@ -38,10 +40,10 @@ Each of these artifacts is converted into a pipeline, which always has the follo
   - Add the specific steps that were introduced by the specific flow
   - Add a 'dump to target' step to save the intermediate resources into storage (S3)
 
-The pipelines' execution order is maintained by properly setting the dependencies between the 
- different pipelines. This is based on the list of required artifacts that each flow 
+The pipelines' execution order is maintained by properly setting the dependencies between the
+ different pipelines. This is based on the list of required artifacts that each flow
   defines.
-  
-An aggregating pipeline is also created that assembles the final package, based on all the 
-  separate intermediate packages. This aggregating datapackage does not need to process any 
+
+An aggregating pipeline is also created that assembles the final package, based on all the
+  separate intermediate packages. This aggregating datapackage does not need to process any
   data, as it copies resources with absolute URL paths (and not relative ones).
