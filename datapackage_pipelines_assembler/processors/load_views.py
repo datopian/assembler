@@ -15,7 +15,7 @@ def modify_datapackage(dp, parameters, stats):
             'transform': {
                 'limit': int(parameters.get('limit', 10000))
             },
-            'resources': [resource.name]
+            'resources': [resource.name.replace('_csv_preview', '')]
         }
         views.append(view)
     dp['views'] = views

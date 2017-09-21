@@ -24,7 +24,7 @@ class DerivedPreviewProcessingNode(BaseProcessingNode):
                               'datahub': {
                                 'type': "derived/preview",
                                 'derivedFrom': [
-                                    artifact.resource_name
+                                    artifact.resource_name.replace('_csv', '')
                                 ]
                               },
                               "forView": [
