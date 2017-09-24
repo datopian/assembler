@@ -5,6 +5,9 @@ from typing import Tuple
 import datapackage
 from copy import deepcopy
 
+import logging
+from datapackage import Resource
+
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact
 
@@ -26,6 +29,8 @@ def planner(datapackage_input, processing, outputs):
                 resource.descriptor['url'] = resource.source
                 resource_info.append(deepcopy(resource.descriptor))
             datapackage_cache[datapackage_url] = resource_info
+        else:
+            logging.info('CACHE HIT for %s (%d entries)', datapackage_url, len(datapackage_cache))
         resource_info = datapackage_cache[datapackage_url]
     else:
         for descriptor in resource_info:
