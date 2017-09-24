@@ -1,12 +1,12 @@
 import os
-from typing import List
-from typing import Tuple
+from typing import List  # noqa
+from typing import Tuple  # noqa
+from datapackage import Resource  # noqa
 
 import datapackage
 from copy import deepcopy
 
 import logging
-from datapackage import Resource
 
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact

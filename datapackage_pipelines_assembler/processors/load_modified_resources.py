@@ -3,7 +3,7 @@ import os
 import copy
 import datapackage
 import logging
-from datapackage import Resource
+from datapackage import Resource  # noqa
 from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
