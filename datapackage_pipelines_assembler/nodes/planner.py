@@ -66,8 +66,8 @@ def planner(datapackage_input, processing, outputs):
             if not descriptor['url'].endswith(descriptor['format']):
                 descriptor['url'] += '#.{}'.format(descriptor['format'])
 
-        print(descriptor['url'])
-        print(descriptor['format'])
+        # print(descriptor['url'])
+        # print(descriptor['format'])
 
         is_geojson = (
             (descriptor.get('format') == 'geojson') or
