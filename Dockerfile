@@ -6,4 +6,4 @@ WORKDIR /app
 RUN pip install . "rfc3986<1.0"
 RUN apk add --update postgresql-client
 
-CMD ["server"]
+ENTRYPOINT ["/app/startup.sh"]
