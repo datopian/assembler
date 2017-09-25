@@ -26,18 +26,20 @@ def planner(datapackage_input, processing, outputs):
             resource_info = []
             dp = datapackage.DataPackage(datapackage_url)
             for resource in dp.resources:  # type: Resource
-                resource.descriptor['url'] = resource.source
                 resource_info.append(deepcopy(resource.descriptor))
             datapackage_cache[datapackage_url] = resource_info
         resource_info = datapackage_cache[datapackage_url]
-    else:
-        for descriptor in resource_info:
-            path = descriptor['path']
-            if path.startswith('http'):
-                url = path
-            else:
-                url = os.path.join(os.path.dirname(datapackage_url), path)
-            descriptor['url'] = url
+
+    for descriptor in resource_info:
+        path = descriptor['path']
+        if isinstance(path, list):
+            path = path[0]
+        if path.startswith('http'):
+            url = path
+        else:
+            url = os.path.join(os.path.dirname(datapackage_url), path)
+        descriptor['url'] = url
+        descriptor['path'] = path
 
     # print('PLAN resource_info', resource_info)
 
