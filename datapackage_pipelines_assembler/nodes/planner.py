@@ -110,8 +110,10 @@ def planner(datapackage_input, processing, outputs):
                 ri_ = deepcopy(ri)
                 if 'tabulator' in p:
                     ri_.update(p['tabulator'])
-                    ri_['name'] = p['output']
-                    updated_resource_info.append(ri_)
+                if 'schema' in p:
+                    ri_['schema'] = p['schema']
+                ri_['name'] = p['output']
+                updated_resource_info.append(ri_)
     resource_info = dict(
         (ri['name'], ri)
         for ri in updated_resource_info
