@@ -61,13 +61,12 @@ def planner(datapackage_input, processing, outputs):
         if mapping is not None:
             descriptor['url'] = mapping
 
-        # Augment url with format hint
-        if 'format' in descriptor:
-            if not descriptor['url'].endswith(descriptor['format']):
-                descriptor['url'] += '#.{}'.format(descriptor['format'])
+        format = descriptor.get('format')
 
-        # print(descriptor['url'])
-        # print(descriptor['format'])
+        # Augment url with format hint
+        if format is not None:
+            if not descriptor['url'].endswith(format):
+                descriptor['url'] += '#.{}'.format(format)
 
         is_geojson = (
             (descriptor.get('format') == 'geojson') or
@@ -97,13 +96,12 @@ def planner(datapackage_input, processing, outputs):
 
     updated_resource_info = []
     for ri in resource_info:
-        if ri['datahub']['type'] != 'source/tabular':
-            updated_resource_info.append(ri)
-            continue
-
         if ri['name'] not in processed_resources:
             updated_resource_info.append(ri)
             continue
+
+        if ri['datahub']['type'] != 'source/tabular':
+            updated_resource_info.append(ri)
 
         for p in processing:
             if p['input'] == ri['name']:
@@ -114,6 +112,7 @@ def planner(datapackage_input, processing, outputs):
                     ri_['schema'] = p['schema']
                 ri_['name'] = p['output']
                 updated_resource_info.append(ri_)
+
     resource_info = dict(
         (ri['name'], ri)
         for ri in updated_resource_info
