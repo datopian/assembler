@@ -18,6 +18,8 @@ def modify_datapackage(dp, parameters, stats):
 
     urls = parameters['urls']
     views = dp.get('views', [])
+    row_count = 0
+    bytes = 0
 
     for url in urls:
         logging.info('URL: %s', url)
@@ -28,6 +30,9 @@ def modify_datapackage(dp, parameters, stats):
         for resource_ in dp_.resources:
             resource: Resource = resource_
             descriptor = copy.deepcopy(resource.descriptor)
+            if descriptor['datahub']['type'] == 'derived/csv':
+                row_count += int(descriptor.get('rowcount', 0))
+            bytes += int(descriptor.get('bytes', 0))
             source = resource.source
             if os.environ.get('ASSEMBLER_LOCAL'):
                 descriptor[PROP_STREAMED_FROM] = source
@@ -38,6 +43,8 @@ def modify_datapackage(dp, parameters, stats):
             dp['resources'].append(descriptor)
 
     dp['views'] = views
+    dp['datahub']['stats']['rowcount'] = row_count
+    dp['datahub']['stats']['bytes'] = bytes
 
     return dp
 
