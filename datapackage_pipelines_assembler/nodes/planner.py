@@ -6,7 +6,7 @@ from datapackage import Resource  # noqa
 import datapackage
 from copy import deepcopy
 
-import logging
+import logging # noqa
 
 from .node_collector import collect_artifacts
 from .base_processing_node import ProcessingArtifact

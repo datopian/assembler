@@ -81,6 +81,7 @@ class Generator(GeneratorBase):
         owner = meta.get('owner')
         findability = meta.get('findability', 'published')
         update_time = meta.get('update_time')
+        schedule = source.get('schedule', {})
 
         inputs = source.get('inputs', [])
         assert len(inputs) == 1, 'Only supporting one input atm'
@@ -157,7 +158,8 @@ class Generator(GeneratorBase):
         pipeline = {
             'update_time': update_time,
             'dependencies': dependencies,
-            'pipeline': steps(*final_steps)
+            'pipeline': steps(*final_steps),
+            'schedule': schedule
         }
         # print('yielding', pipeline_id(), pipeline)
         yield pipeline_id(), pipeline
