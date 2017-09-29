@@ -111,6 +111,7 @@ def planner(datapackage_input, processing, outputs):
                 if 'schema' in p:
                     ri_['schema'] = p['schema']
                 ri_['name'] = p['output']
+                ri_['datahub']['type'] = 'source/tabular'
                 updated_resource_info.append(ri_)
 
     resource_info = dict(
