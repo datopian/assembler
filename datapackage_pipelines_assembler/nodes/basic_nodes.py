@@ -49,10 +49,25 @@ class NonTabularProcessingNode(BaseProcessingNode):
         super(NonTabularProcessingNode, self).__init__(available_artifacts, outputs)
 
     def get_artifacts(self):
-        output = ProcessingArtifact(
-            None, 'non-tabular',
-            [], self.available_artifacts,
-            [],
-            False
-        )
-        yield output
+        for artifact in self.available_artifacts:
+            datahub_type = 'derived/non-tabular'
+            resource_name = artifact.resource_name + '_{}'.format('non-tabular')
+            output = ProcessingArtifact(
+                datahub_type, resource_name,
+                [], [artifact],
+                [('assembler.update_resource',
+                  {
+                      'name': artifact.resource_name,
+                      'update': {
+                          'name': resource_name,
+                          'datahub': {
+                            'type': datahub_type,
+                            'derivedFrom': [
+                                artifact.resource_name
+                            ]
+                          }
+                      }
+                  })],
+                False
+            )
+            yield output
