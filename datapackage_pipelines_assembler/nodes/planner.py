@@ -138,7 +138,11 @@ def planner(datapackage_input, processing, outputs):
             ri = resource_info[required_artifact.resource_name]
             if 'resource' in ri:
                 pipeline_steps.append(
-                    ('load_resource', ri)
+                    ('load_resource', {
+                        'url': ri['url'],
+                        'resource': ri['resource'],
+                        'stream': True
+                    })
                 )
             else:
                 pipeline_steps.append(
@@ -153,9 +157,19 @@ def planner(datapackage_input, processing, outputs):
             ])
 
         for required_artifact in derived_artifact.required_other_artifacts:
-            pipeline_steps.append(
-                ('add_resource', resource_info[required_artifact.resource_name])
-            )
+            ri = resource_info[required_artifact.resource_name]
+            if 'resource' in ri:
+                pipeline_steps.append(
+                    ('load_resource', {
+                        'url': ri['url'],
+                        'resource': ri['resource'],
+                        'stream': False
+                    })
+                )
+            else:
+                pipeline_steps.append(
+                    ('add_resource', ri)
+                )
 
         pipeline_steps.extend(derived_artifact.pipeline_steps)
         pipeline_steps.extend([
