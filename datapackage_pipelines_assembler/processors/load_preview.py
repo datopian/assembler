@@ -3,7 +3,7 @@ import collections
 from datapackage_pipelines.wrapper import spew, ingest
 
 parameters, datapackage, res_iter = ingest()
-limit = int(parameters.get('limit', 200))
+limit = int(parameters.get('limit', 10000))
 
 
 def generate_preview(res):
