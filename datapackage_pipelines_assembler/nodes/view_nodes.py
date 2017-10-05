@@ -33,8 +33,8 @@ class DerivedPreviewProcessingNode(BaseProcessingNode):
                           }
                       }),
                     # TODO pass limit as a parameter
-                    ('assembler.load_preview', {}),
-                    ('assembler.load_views', {})],
+                    ('assembler.load_preview', {'limit': 2000}),
+                    ('assembler.load_views', {'limit': 2000})],
                     True
                 )
                 yield output

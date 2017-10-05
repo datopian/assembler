@@ -13,7 +13,7 @@ def modify_datapackage(dp, parameters, stats):
                 'type': 'preview'
             },
             'transform': {
-                'limit': int(parameters.get('limit', 10000))
+                'limit': parameters['limit']
             },
             'resources': [resource.name.replace('_csv_preview', '')]
         }

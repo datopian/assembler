@@ -26,6 +26,9 @@ def modify_datapackage(dp, parameters, stats):
         dp_ = datapackage.DataPackage(url)
         view = dp_.descriptor.get('views', [])
         views += view
+        # Skip creation of preview resources if original resource is already small
+        if dp_.descriptor['datahub']['stats'].get('rowcount') == 0:
+            continue
 
         for resource_ in dp_.resources:
             resource: Resource = resource_
