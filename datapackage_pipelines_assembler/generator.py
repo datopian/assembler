@@ -110,7 +110,8 @@ class Generator(GeneratorBase):
 
                 pipeline = {
                     'pipeline': steps(*pipeline_steps),
-                    'dependencies': dependencies
+                    'dependencies': dependencies,
+                    'schedule': schedule
                 }
                 yield inner_pipeline_id, pipeline
 
@@ -158,8 +159,7 @@ class Generator(GeneratorBase):
         pipeline = {
             'update_time': update_time,
             'dependencies': dependencies,
-            'pipeline': steps(*final_steps),
-            'schedule': schedule
+            'pipeline': steps(*final_steps)
         }
         # print('yielding', pipeline_id(), pipeline)
         yield pipeline_id(), pipeline
