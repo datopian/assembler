@@ -92,10 +92,21 @@ class Generator(GeneratorBase):
         urls = []
         inner_pipeline_ids = []
 
+        outputs = source.get('outputs', [])
+        zip_output = {
+            'kind': 'zip',
+            'parameters': {
+                'out-file': '%s.zip' % meta.get('dataset', 'datahub')
+            }
+        }
+        zip_there = any(output['kind'] == 'zip' for output in outputs)
+        if not zip_there:
+            outputs.append(zip_output)
+
         def planner_pipelines():
             planner_gen = planner(input,
                                   source.get('processing', []),
-                                  source.get('outputs', []))
+                                  outputs)
             datapackage_url = None
             while True:
                 inner_pipeline_id, pipeline_steps, dependencies = planner_gen.send(datapackage_url)

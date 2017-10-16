@@ -33,7 +33,8 @@ class OutputToZipProcessingNode(BaseProcessingNode):
                     'path': 'data/{}'.format(out_file),
                     'datahub': {
                       'type': "derived/zip",
-                    }
+                    },
+                    'description': 'Compressed versions of dataset. Includes normalized CSV and JSON data with original data and datapackage.json.' #noqa
                 })],
                 False
             )
