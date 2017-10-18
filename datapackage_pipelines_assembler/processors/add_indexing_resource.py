@@ -15,7 +15,7 @@ SCHEMA = {
         {'name': 'status', 'type': 'string'},
         {'name': 'messsage', 'type': 'string'},
         {'name': 'findability', 'type': 'string'},
-        {'name': 'payload', 'type': 'object', 'es: index': False}
+        {'name': 'payload', 'type': 'object', 'es:index': False}
     ],
     'primaryKey': 'ownerid'
 }
