@@ -6,8 +6,6 @@ from datapackage_pipelines.generators import (
 )
 from .nodes.planner import planner
 
-from .processors.dump_to_s3 import create_index # noqa
-
 import logging
 log = logging.getLogger(__name__)
 
@@ -154,6 +152,9 @@ class Generator(GeneratorBase):
             ('assembler.sample',),
         ]
         final_steps.extend(dump_steps(pipeline_id(), 'latest'))
+        final_steps.append(('assembler.add_indexing_resource', {
+            'flow-id': pipeline_id()
+        }))
         final_steps.append(
             ('elasticsearch.dump.to_index',
              {
@@ -162,6 +163,12 @@ class Generator(GeneratorBase):
                          {
                              'resource-name': '__datasets',
                              'doc-type': 'dataset'
+                         }
+                     ],
+                     'events': [
+                         {
+                             'resource-name': '__events',
+                             'doc-type': 'event'
                          }
                      ]
                  }

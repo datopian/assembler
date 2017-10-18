@@ -1,7 +1,6 @@
 import copy
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
-from tableschema_elasticsearch import Storage
 
 from datapackage_pipelines.wrapper import ingest, spew # noqa
 from datapackage_pipelines_aws.s3_dumper import S3Dumper
@@ -30,11 +29,6 @@ SCHEMA = {
     ],
     'primaryKey': ['id']
 }
-
-
-def create_index(index_name):
-    storage = Storage()
-    storage.create(index_name, ('dataset', SCHEMA))
 
 
 def modify_datapackage(dp):
