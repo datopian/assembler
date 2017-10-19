@@ -17,7 +17,7 @@ SCHEMA = {
         {'name': 'findability', 'type': 'string'},
         {'name': 'payload', 'type': 'object', 'es:index': False}
     ],
-    'primaryKey': 'ownerid'
+    'primaryKey': ['ownerid', 'timestamp']
 }
 
 
