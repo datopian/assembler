@@ -1,0 +1,17 @@
+meta:
+  dataset: multiple-files
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays.csv
+      emails: ../../data/sample_emails.csv
+  url: datapackage.json
+outputs:
+- kind: zip
+  parameters:
+    out-file: 'multiple-files.zip'

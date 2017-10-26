@@ -56,7 +56,9 @@ def s3_path(*parts):
     else:
         path = '/'.join(str(p) for p in parts)
         bucket = os.environ['PKGSTORE_BUCKET']
-        return 'https://{}/{}'.format(bucket, path)
+        # Handle other s3 compatible server as well (for testing)
+        protocol = os.environ.get('S3_ENDPOINT_URL') or 'https://'
+        return '{}{}/{}'.format(protocol, bucket, path)
 
 
 class Generator(GeneratorBase):

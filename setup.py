@@ -20,7 +20,7 @@ NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage-pipelines',
     'datapackage-pipelines-elasticsearch>=0.0.3',
-    'datapackage-pipelines-aws>=0.0.8',
+    'datapackage-pipelines-aws>=0.0.9',
     'psycopg2',
     'tweepy',
     'facebook-sdk',
@@ -29,6 +29,9 @@ INSTALL_REQUIRES = [
 TESTS_REQUIRE = [
     'pylama',
     'tox',
+    'moto',
+    'boto3',
+    'google-compute-engine'
 ]
 README = read('README.md')
 VERSION = read(PACKAGE, 'VERSION')

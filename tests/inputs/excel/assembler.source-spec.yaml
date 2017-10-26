@@ -1,0 +1,16 @@
+meta:
+  dataset: excel
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays.xlsx
+  url: datapackage.json
+outputs:
+- kind: zip
+  parameters:
+    out-file: 'excel.zip'

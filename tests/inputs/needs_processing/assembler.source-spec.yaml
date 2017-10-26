@@ -1,0 +1,26 @@
+meta:
+  dataset: single-file-processed
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays_invalid.csv
+  url: datapackage.json
+processing:
+  -
+    input: birthdays
+    tabulator:
+      skip_rows: 4
+      headers:
+        - date
+        - first_name
+        - last_name
+    output: birthdays
+outputs:
+- kind: zip
+  parameters:
+    out-file: 'single-file-processed.zip'
