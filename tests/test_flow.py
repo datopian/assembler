@@ -1,23 +1,52 @@
 import json
+import jwt
 import os
 import requests
 import subprocess
 import time
 import unittest
+import yaml
 
 import boto3
 from elasticsearch import Elasticsearch, NotFoundError
+
+import flowmanager.controllers
+from flowmanager.models import FlowRegistry
+
+upload = flowmanager.controllers.upload
+
+private_key = open('tests/private.pem').read()
+public_key = open('tests/public.pem').read()
 
 ES_SERVER = os.environ['DPP_ELASTICSEARCH'] = 'http://localhost:9200'
 S3_SERVER = os.environ['S3_ENDPOINT_URL'] = 'http://localhost:5000/'
 os.environ['PKGSTORE_BUCKET'] = 'testing.datahub.io'
 os.environ['AWS_ACCESS_KEY_ID'] = 'foo'
 os.environ['AWS_SECRET_ACCESS_KEY'] = 'bar'
+os.environ['SOURCESPEC_REGISTRY_DB_ENGINE'] = DB_ENGINE = 'postgres://datahub:secret@localhost/datahq'
+
+registry = FlowRegistry(DB_ENGINE)
+
 
 def run_factory(dir='.'):
     os.chdir(dir)
+    flow = yaml.load(open('assembler.source-spec.yaml'))
+    token = generate_token(flow['meta']['owner'])
+    response = upload(token, flow, registry, public_key)
     subprocess.call(['dpp', 'run', 'dirty'])
+    revision = registry.get_revision_by_dataset_id(response['id'])
+    registry.delete_pipelines(response['id'] + '/' + str(revision['revision']))
     os.remove('.dpp.db')
+
+def generate_token(owner):
+    ret = {
+        'userid': owner,
+        'permissions': {},
+        'service': ''
+    }
+    token = jwt.encode(ret, private_key, algorithm='RS256').decode('ascii')
+    return token
+
 
 class TestFlow(unittest.TestCase):
 
@@ -96,6 +125,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
 
+
     def test_multiple_file(self):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/multiple_files'))
@@ -170,6 +200,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['event_entity'], 'flow')
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
+
 
     def test_excel_file(self):
         run_factory(os.path.join(os.path.dirname(
@@ -340,6 +371,7 @@ class TestFlow(unittest.TestCase):
     #         os.path.realpath(__file__)), 'inputs/local/needs_processing'))
     #     elapsed_time_second_run = time.time() - start_time
     #     self.assertTrue(time_elapsed_first_run > elapsed_time_second_run)
+
     @classmethod
     def teardown_class(self):
         for obj in self.bucket.objects.all():

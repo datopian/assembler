@@ -1,7 +1,0 @@
-{ 
-  "name": "sample-datapackage",
-  "resources": [
-     { "name": "sample-resource", "path": "nonexistent/sample.csv", "schema": { "fields": [ {"name": "id", "type": "string"} ] } },
-     { "name": "readme", "path": "docs/readme.txt"}
-  ]
-}

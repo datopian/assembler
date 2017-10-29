@@ -3,6 +3,10 @@ sudo:
 
 services:
     - elasticsearch
+    - postgresql
+
+addons:
+  postgresql: "9.5"
 
 dist:
   trusty
@@ -29,6 +33,8 @@ before_script:
   - sleep 30
   - curl localhost:9200
   - curl localhost:5000
+  - psql -U postgres -c "create user datahub password 'secret' createdb;"
+  - psql -U postgres -c "create database datahq owner=datahub;"
 
 after_success:
   - coveralls

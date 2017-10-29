@@ -19,12 +19,14 @@ PACKAGE = 'datapackage_pipelines_assembler'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'datapackage-pipelines',
-    'datapackage-pipelines-elasticsearch>=0.0.3',
-    'datapackage-pipelines-aws>=0.0.9',
     'psycopg2',
     'tweepy',
     'facebook-sdk',
     'google-api-python-client==1.5.3',
+    'datapackage-pipelines-elasticsearch'
+]
+DEPENDENCY_LINKS=[
+    'https://github.com/datahq/specstore/archive/master.zip'
 ]
 TESTS_REQUIRE = [
     'pylama',
@@ -45,6 +47,7 @@ setup(
     packages=PACKAGES,
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
+    dependency_links=DEPENDENCY_LINKS,
     tests_require=TESTS_REQUIRE,
     extras_require={'develop': TESTS_REQUIRE},
     zip_safe=False,

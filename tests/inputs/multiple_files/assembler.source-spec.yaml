@@ -6,11 +6,41 @@ meta:
   version: 1
 inputs:
 - kind: datapackage
+  url: datapackage.json
   parameters:
     resource-mapping:
       birthdays: ../../data/sample_birthdays.csv
       emails: ../../data/sample_emails.csv
-  url: datapackage.json
+    descriptor:
+      name: multiple-files
+      resources:
+        -
+          name: birthdays
+          path: data/birthdays.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: date
+                type: date
+              -
+                name: first_name
+                type: string
+              -
+                name: last_name
+                type: string
+        -
+          name: emails
+          path: data/emails.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: id
+                type: number
+              -
+                name: email
+                type: string
 outputs:
 - kind: zip
   parameters:
