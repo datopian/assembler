@@ -6,6 +6,7 @@ import json
 from datapackage_pipelines.generators import GeneratorBase
 
 import logging
+
 log = logging.getLogger(__name__)
 
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
@@ -23,4 +24,8 @@ class Generator(GeneratorBase):
     @classmethod
     def generate_pipeline(cls, source):
         registry = FlowRegistry(DB_ENGINE)
-        yield from registry.list_pipelines()
+        count = 0
+        for pipeline in registry.list_pipelines():  # type: Pipelines
+            yield pipeline.pipeline_id, pipeline.pipeline_details
+            count += 1
+        logging.error('assember sent %d pipelines', count)
