@@ -112,9 +112,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
-
-        path = paths['single-file_zip']
-        assert path.startswith('{}{}/datahub/single-file/1/single-file_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['datapackage_zip']
+        assert path.startswith('{}{}/datahub/single-file/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         # TODO: compare zip files
@@ -204,8 +203,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_emails.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['multiple-files_zip']
-        assert path.startswith('{}{}/datahub/multiple-files/1/multiple-files_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['datapackage_zip']
+        assert path.startswith('{}{}/datahub/multiple-files/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -271,8 +270,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['excel_zip']
-        assert path.startswith('{}{}/datahub/excel/1/excel_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['datapackage_zip']
+        assert path.startswith('{}{}/datahub/excel/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -339,8 +338,8 @@ class TestFlow(unittest.TestCase):
         self.assertListEqual(exp_json, res.json())
 
 
-        path = paths['single-file-processed_zip']
-        assert path.startswith('{}{}/datahub/single-file-processed/1/single-file-processed_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['datapackage_zip']
+        assert path.startswith('{}{}/datahub/single-file-processed/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
