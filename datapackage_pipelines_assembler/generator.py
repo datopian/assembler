@@ -13,6 +13,7 @@ ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/assembler_spec_schema.json')
 DB_ENGINE = os.environ.get('SOURCESPEC_REGISTRY_DB_ENGINE')
+REGISTRY = FlowRegistry(DB_ENGINE)
 
 
 class Generator(GeneratorBase):
@@ -23,9 +24,8 @@ class Generator(GeneratorBase):
 
     @classmethod
     def generate_pipeline(cls, source):
-        registry = FlowRegistry(DB_ENGINE)
         count = 0
-        for pipeline in registry.list_pipelines():  # type: Pipelines
+        for pipeline in REGISTRY.list_pipelines():  # type: Pipelines
             yield pipeline.pipeline_id, pipeline.pipeline_details
             count += 1
         logging.error('assember sent %d pipelines', count)
