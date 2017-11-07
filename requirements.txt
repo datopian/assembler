@@ -1,4 +1,4 @@
 https://github.com/datahq/specstore/archive/master.zip
 https://github.com/datahq/planner/archive/master.zip
+https://github.com/frictionlessdata/datapackage-pipelines-aws/archive/master.zip
 datapackage-pipelines-elasticsearch
-datapackage-pipelines-aws>=0.0.10
