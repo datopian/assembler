@@ -54,15 +54,14 @@ def generate_token(owner):
 
 class TestFlow(unittest.TestCase):
 
-    @classmethod
-    def setup_class(self):
+    def setUp(self):
         es = Elasticsearch(hosts=[ES_SERVER])
         es.indices.delete(index='datahub', ignore=[400, 404])
         es.indices.delete(index='events', ignore=[400, 404])
         es.indices.flush()
         for tbl in ('pipelines', 'dataset', 'dataset_revision'):
             try:
-                create_engine(DB_ENGINE).execute('drop table %s' % tbl)
+                create_engine(DB_ENGINE).execute('DELETE FROM %s' % tbl)
             except:
                 pass
         s3 = boto3.resource(
@@ -374,11 +373,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['status'], 'OK')
 
     def test_elasticsearch_saves_multiple_datasets_and_events(self):
-        # Make sure ES is empty
-        es = Elasticsearch(hosts=[ES_SERVER])
-        es.indices.delete(index='datahub', ignore=[400, 404])
-        es.indices.delete(index='events', ignore=[400, 404])
-
         # Run flow
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'))
@@ -408,11 +402,6 @@ class TestFlow(unittest.TestCase):
         events = res.json()
         self.assertEqual(meta['hits']['total'], 3)
         self.assertEqual(events['hits']['total'], 3)
-
-        # Clear again to not mess up with other tests
-        es.indices.delete(index='datahub', ignore=[400, 404])
-        es.indices.delete(index='events', ignore=[400, 404])
-
 
     ## TODO run flow, update metadata, run again
     # def test_quick_succession_local(self):
