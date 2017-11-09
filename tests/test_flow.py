@@ -14,6 +14,7 @@ from flowmanager.models import FlowRegistry
 from sqlalchemy import create_engine
 
 upload = flowmanager.controllers.upload
+configs = flowmanager.controllers.CONFIGS
 
 private_key = open('tests/private.pem').read()
 public_key = open('tests/public.pem').read()
@@ -28,11 +29,11 @@ os.environ['SOURCESPEC_REGISTRY_DB_ENGINE'] = DB_ENGINE = 'postgres://datahub:se
 registry = FlowRegistry(DB_ENGINE)
 
 
-def run_factory(dir='.'):
+def run_factory(dir='.', config=configs):
     os.chdir(dir)
     flow = yaml.load(open('assembler.source-spec.yaml'))
     token = generate_token(flow['meta']['owner'])
-    response = upload(token, flow, registry, public_key)
+    response = upload(token, flow, registry, public_key, config=config)
 
     subprocess.call(['dpp', 'run', 'dirty'],
                     stdout=subprocess.DEVNULL,
@@ -77,6 +78,135 @@ class TestFlow(unittest.TestCase):
         except:
             pass
 
+    def test_coppies_accross_the_non_tabular_source(self):
+        config = {'allowed_types': ['source/non-tabular']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/non_tabular'), config=config)
+        res = requests.get(
+            '{}{}/datahub/non-tabular/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 1)
+        path = paths['test-geojson']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_coppies_accross_the_tabular_source(self):
+        config = {'allowed_types': ['source/tabular']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 1)
+        path = paths['birthdays']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_generates_only_derived_csv(self):
+        config = {'allowed_types': ['source/tabular', 'derived/csv']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 2)
+        path = paths['birthdays_csv']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_generates_only_derived_json(self):
+        config = {'allowed_types': ['source/tabular', 'derived/json']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 2)
+        path = paths['birthdays_json']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_generates_only_derived_zip(self):
+        config = {'allowed_types': ['source/tabular', 'derived/zip']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 2)
+        path = paths['datapackage_zip']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+    def test_generates_without_preview_if_small_enough(self):
+        config = {'allowed_types': [
+            'source/tabular', 'derived/csv', 'derived/json', 'derived/preview']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 3)
+        path = paths['birthdays_json']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        path = paths['birthdays_csv']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsNone(paths.get('birthdays_csv_preview'))
+
+
+    def test_agenerates_preview(self):
+        config = {'allowed_types': [
+            'source/tabular', 'derived/csv', 'derived/preview']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/preview'), config=config)
+        res = requests.get(
+            '{}{}/datahub/needs-preview/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 3)
+        path = paths['test-preview_csv_preview']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.json()), 2000)
+        path = paths['test-preview_csv']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
     def test_single_file(self):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'))
@@ -90,7 +220,6 @@ class TestFlow(unittest.TestCase):
         )
         path = paths['birthdays']
         assert path.startswith('{}{}/datahub/single-file/1/birthdays/data'.format(S3_SERVER, self.bucket_name))
-        print(path)
         res = requests.get(path)
 
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()

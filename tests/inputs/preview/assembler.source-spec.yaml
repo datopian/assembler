@@ -1,0 +1,30 @@
+meta:
+  dataset: needs-preview
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  url: datapackage.json
+  parameters:
+    resource-mapping:
+      test-preview: ../../data/sample_birthdays_preview.csv
+    descriptor:
+      name: needs-preview
+      resources:
+        -
+          name: test-preview
+          path: data/preview.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: date
+                type: date
+              -
+                name: first_name
+                type: string
+              -
+                name: last_name
+                type: string

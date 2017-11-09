@@ -1,0 +1,23 @@
+{
+  "name": "non-tabular",
+  "resources": [
+    {
+      "name": "test-geojson",
+      "path": "data/sample.geojson",
+      "format": "geojson",
+      "mediatype": "application/json",
+      "schema": {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "ISO3166-1-Alpha-3",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
