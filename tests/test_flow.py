@@ -74,7 +74,7 @@ class TestFlow(unittest.TestCase):
         try:
             for obj in self.bucket.objects.all():
                 obj.delete()
-                self.bucket.delete()
+            self.bucket.delete()
         except:
             pass
 
@@ -185,7 +185,7 @@ class TestFlow(unittest.TestCase):
         self.assertIsNone(paths.get('birthdays_csv_preview'))
 
 
-    def test_agenerates_preview(self):
+    def test_generates_preview(self):
         config = {'allowed_types': [
             'source/tabular', 'derived/csv', 'derived/preview']}
         run_factory(os.path.join(os.path.dirname(
@@ -219,7 +219,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file/1/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/birthdays/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
 
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
@@ -227,21 +227,21 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(exp_csv, res.text)
 
         path = paths['birthdays_csv']
-        assert path.startswith('{}{}/datahub/single-file/1/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
 
 
         path = paths['birthdays_json']
-        assert path.startswith('{}{}/datahub/single-file/1/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
         path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/single-file/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         # TODO: compare zip files
@@ -292,47 +292,47 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/multiple-files/1/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/birthdays/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv, res.text)
 
         path = paths['birthdays_csv']
-        assert path.startswith('{}{}/datahub/multiple-files/1/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
 
         path = paths['birthdays_json']
-        assert path.startswith('{}{}/datahub/multiple-files/1/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
         path = paths['emails']
-        assert path.startswith('{}{}/datahub/multiple-files/1/emails/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/emails/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_emails.csv').read()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv, res.text)
 
         path = paths['emails_csv']
-        assert path.startswith('{}{}/datahub/multiple-files/1/emails_csv/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/emails_csv/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
 
         path = paths['emails_json']
-        assert path.startswith('{}{}/datahub/multiple-files/1/emails_json/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/emails_json/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         exp_json = json.load(open('../../outputs/json/sample_emails.json'))
         self.assertListEqual(exp_json, res.json())
 
         path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/multiple-files/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -379,27 +379,27 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/excel/1/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/excel/birthdays/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
 
         path = paths['birthdays_csv']
-        assert path.startswith('{}{}/datahub/excel/1/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/excel/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
 
         path = paths['birthdays_json']
-        assert path.startswith('{}{}/datahub/excel/1/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/excel/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
         path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/excel/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/excel/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -445,21 +445,21 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file-processed/1/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/birthdays/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays_invalid.csv').read()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv, res.text)
 
         path = paths['birthdays_csv']
-        assert path.startswith('{}{}/datahub/single-file-processed/1/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
 
         path = paths['birthdays_json']
-        assert path.startswith('{}{}/datahub/single-file-processed/1/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
@@ -467,7 +467,7 @@ class TestFlow(unittest.TestCase):
 
 
         path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/single-file-processed/1/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
