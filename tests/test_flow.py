@@ -65,12 +65,12 @@ class TestFlow(unittest.TestCase):
                 create_engine(DB_ENGINE).execute('DELETE FROM %s' % tbl)
             except:
                 pass
-        s3 = boto3.resource(
+        self.s3 = boto3.resource(
             service_name='s3',
             endpoint_url=S3_SERVER,
         )
         self.bucket_name = os.environ['PKGSTORE_BUCKET']
-        self.bucket = s3.Bucket(self.bucket_name)
+        self.bucket = self.s3.Bucket(self.bucket_name)
         try:
             for obj in self.bucket.objects.all():
                 obj.delete()
@@ -496,6 +496,75 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(len(hits), 1)
 
         event = hits[0]
+        self.assertEqual(event['event_action'],'finished')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
+
+    def test_private_dataset(self):
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/private_dataset'))
+
+        res = requests.get(
+            '{}{}/datahub/private/latest/datapackage.json'.format(S3_SERVER, self.bucket_name))
+        self.assertEqual(res.status_code, 403)
+        obj = self.s3.Object(self.bucket_name, 'datahub/private/latest/datapackage.json')
+        dp = obj.get()['Body'].read().decode('utf-8')
+        dp = json.loads(dp)
+        paths = dict(
+            (r['name'], r['path'])
+            for r in dp['resources']
+        )
+
+        path = paths['birthdays']
+        assert path.startswith('{}{}/datahub/private/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+
+        self.assertEqual(res.status_code, 403)
+
+        path = paths['birthdays_csv']
+        assert path.startswith('{}{}/datahub/private/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 403)
+
+
+        path = paths['birthdays_json']
+        assert path.startswith('{}{}/datahub/private/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 403)
+
+        path = paths['datapackage_zip']
+        assert path.startswith('{}{}/datahub/private/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 403)
+
+        # Elasticsearch
+        res = requests.get('http://localhost:9200/datahub/_search')
+        self.assertEqual(res.status_code, 200)
+
+        meta = res.json()
+        hits = [hit['_source'] for hit in meta['hits']['hits']
+            if hit['_source']['datapackage']['name'] == 'private']
+
+        self.assertEqual(len(hits), 1)
+
+        datahub = hits[0]['datahub']
+        datapackage = hits[0]['datapackage']
+        self.assertEqual(datahub['findability'],'private')
+        self.assertEqual(datahub['owner'],'datahub')
+        self.assertEqual(datahub['stats']['rowcount'], 20)
+        self.assertEqual(len(datapackage['resources']), 4)
+
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'private']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['dataset'],'private')
         self.assertEqual(event['event_action'],'finished')
         self.assertEqual(event['event_entity'], 'flow')
         self.assertEqual(event['owner'], 'datahub')

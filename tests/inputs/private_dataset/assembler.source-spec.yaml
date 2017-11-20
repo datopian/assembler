@@ -1,0 +1,34 @@
+meta:
+  dataset: private
+  findability: private
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  url: datapackage.json
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays.csv
+    descriptor:
+      name: private
+      resources:
+        -
+          name: birthdays
+          path: data/birthdays.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: date
+                type: date
+              -
+                name: first_name
+                type: string
+              -
+                name: last_name
+                type: string
+outputs:
+- kind: zip
+  parameters:
+    out-file: 'private.zip'
