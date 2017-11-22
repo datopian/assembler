@@ -72,11 +72,11 @@ class TestFlow(unittest.TestCase):
         self.bucket_name = os.environ['PKGSTORE_BUCKET']
         self.bucket = self.s3.Bucket(self.bucket_name)
         try:
-            for obj in self.bucket.objects.all():
-                obj.delete()
-            self.bucket.delete()
+            self.bucket.create()
         except:
             pass
+        for obj in self.bucket.objects.all():
+                obj.delete()
 
     def test_coppies_accross_the_non_tabular_source(self):
         config = {'allowed_types': ['source/non-tabular']}
