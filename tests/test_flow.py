@@ -9,6 +9,13 @@ import yaml
 import boto3
 from elasticsearch import Elasticsearch
 
+ES_SERVER = os.environ['DPP_ELASTICSEARCH'] = 'http://localhost:9200'
+S3_SERVER = os.environ['S3_ENDPOINT_URL'] = 'http://localhost:5000/'
+os.environ['PKGSTORE_BUCKET'] = 'testing.datahub.io'
+os.environ['AWS_ACCESS_KEY_ID'] = 'foo'
+os.environ['AWS_SECRET_ACCESS_KEY'] = 'bar'
+os.environ['SOURCESPEC_REGISTRY_DB_ENGINE'] = DB_ENGINE = 'postgres://datahub:secret@localhost/datahq'
+
 import flowmanager.controllers
 from flowmanager.models import FlowRegistry
 from sqlalchemy import create_engine
@@ -18,13 +25,6 @@ configs = flowmanager.controllers.CONFIGS
 
 private_key = open('tests/private.pem').read()
 public_key = open('tests/public.pem').read()
-
-ES_SERVER = os.environ['DPP_ELASTICSEARCH'] = 'http://localhost:9200'
-S3_SERVER = os.environ['S3_ENDPOINT_URL'] = 'http://localhost:5000/'
-os.environ['PKGSTORE_BUCKET'] = 'testing.datahub.io'
-os.environ['AWS_ACCESS_KEY_ID'] = 'foo'
-os.environ['AWS_SECRET_ACCESS_KEY'] = 'bar'
-os.environ['SOURCESPEC_REGISTRY_DB_ENGINE'] = DB_ENGINE = 'postgres://datahub:secret@localhost/datahq'
 
 registry = FlowRegistry(DB_ENGINE)
 
