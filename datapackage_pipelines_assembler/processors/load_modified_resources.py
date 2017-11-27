@@ -40,7 +40,7 @@ def modify_datapackage(dp, parameters, stats):
             if os.environ.get('ASSEMBLER_LOCAL'):
                 descriptor[PROP_STREAMED_FROM] = source
             else:
-                descriptor['path'] = source
+                descriptor['path'] = source.replace('s3.amazonaws.com/', '')
             if PROP_STREAMING in descriptor:
                 del descriptor[PROP_STREAMING]
             dp['resources'].append(descriptor)
