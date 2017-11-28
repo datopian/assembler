@@ -36,8 +36,8 @@ def run_factory(dir='.', config=configs):
     response = upload(token, flow, registry, public_key, config=config)
 
     subprocess.call(['dpp', 'run', 'dirty'],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
                     )
     revision = registry.get_revision_by_dataset_id(response['id'])
     registry.delete_pipelines(response['id'] + '/' + str(revision['revision']))
@@ -162,6 +162,24 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
+    def test_generates_reports(self):
+        config = {'allowed_types': ['source/tabular', 'derived/report']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/single_file'), config=config)
+        res = requests.get(
+            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 2)
+        path = paths['datapackage_report']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
 
     def test_generates_without_preview_if_small_enough(self):
         config = {'allowed_types': [
@@ -240,6 +258,13 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
+        path = paths['datapackage_report']
+        assert path.startswith('{}{}/datahub/single-file/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
         path = paths['datapackage_zip']
         assert path.startswith('{}{}/datahub/single-file/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
@@ -261,7 +286,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 4)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         # TODO comment me out after #70 is fixed
         # res = requests.get('http://localhost:9200/events/_search')
@@ -332,6 +357,15 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_emails.json'))
         self.assertListEqual(exp_json, res.json())
 
+        path = paths['datapackage_report']
+        assert path.startswith('{}{}/datahub/multiple-files/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertEqual(len(report), 2)
+        self.assertTrue(report[0]['valid'])
+        self.assertTrue(report[1]['valid'])
+
         path = paths['datapackage_zip']
         assert path.startswith('{}{}/datahub/multiple-files/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
@@ -351,7 +385,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 40)
-        self.assertEqual(len(datapackage['resources']), 7)
+        self.assertEqual(len(datapackage['resources']), 8)
 
         # TODO comment me out after #70 is fixed
         # res = requests.get('http://localhost:9200/events/_search')
@@ -400,6 +434,13 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
+        path = paths['datapackage_report']
+        assert path.startswith('{}{}/datahub/excel/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
         path = paths['datapackage_zip']
         assert path.startswith('{}{}/datahub/excel/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
@@ -419,7 +460,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 4)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         # TODO comment me out after #70 is fixed
         # res = requests.get('http://localhost:9200/events/_search')
@@ -468,6 +509,12 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
+        path = paths['datapackage_report']
+        assert path.startswith('{}{}/datahub/single-file-processed/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
 
         path = paths['datapackage_zip']
         assert path.startswith('{}{}/datahub/single-file-processed/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
@@ -488,7 +535,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 4)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         # TODO comment me out after #70 is fixed
         # res = requests.get('http://localhost:9200/events/_search')
@@ -537,6 +584,11 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 403)
 
+        path = paths['datapackage_report']
+        assert path.startswith('{}{}/datahub/private/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 403)
+
         path = paths['datapackage_zip']
         assert path.startswith('{}{}/datahub/private/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
@@ -557,7 +609,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'private')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 4)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         # TODO comment me out after #70 is fixed
         # res = requests.get('http://localhost:9200/events/_search')

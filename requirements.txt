@@ -3,3 +3,4 @@ https://github.com/datahq/planner/archive/master.zip
 https://github.com/datahq/events/archive/master.zip
 datapackage-pipelines-elasticsearch>=0.0.6
 datapackage-pipelines-aws>=0.0.16
+goodtables>=1.5.1
