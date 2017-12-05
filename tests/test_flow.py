@@ -36,8 +36,8 @@ def run_factory(dir='.', config=configs):
     response = upload(token, flow, registry, public_key, config=config)
 
     subprocess.call(['dpp', 'run', 'dirty'],
-                        # stdout=subprocess.DEVNULL,
-                        # stderr=subprocess.DEVNULL
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
                     )
     revision = registry.get_revision_by_dataset_id(response['id'])
     registry.delete_pipelines(response['id'] + '/' + str(revision['revision']))
@@ -158,7 +158,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         self.assertEqual(len(paths), 2)
-        path = paths['datapackage_zip']
+        path = paths['single-file_zip']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -286,8 +286,8 @@ class TestFlow(unittest.TestCase):
         report = res.json()
         self.assertTrue(report[0]['valid'])
 
-        path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/single-file/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['single-file_zip']
+        assert path.startswith('{}{}/datahub/single-file/single-file_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         # TODO: compare zip files
@@ -387,8 +387,8 @@ class TestFlow(unittest.TestCase):
         self.assertTrue(report[0]['valid'])
         self.assertTrue(report[1]['valid'])
 
-        path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/multiple-files/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['multiple-files_zip']
+        assert path.startswith('{}{}/datahub/multiple-files/multiple-files_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -462,8 +462,8 @@ class TestFlow(unittest.TestCase):
         report = res.json()
         self.assertTrue(report[0]['valid'])
 
-        path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/excel/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['excel_zip']
+        assert path.startswith('{}{}/datahub/excel/excel_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -537,8 +537,8 @@ class TestFlow(unittest.TestCase):
         report = res.json()
         self.assertTrue(report[0]['valid'])
 
-        path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/single-file-processed/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['single-file-processed_zip']
+        assert path.startswith('{}{}/datahub/single-file-processed/single-file-processed_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -610,8 +610,8 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 403)
 
-        path = paths['datapackage_zip']
-        assert path.startswith('{}{}/datahub/private/datapackage_zip/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['private_zip']
+        assert path.startswith('{}{}/datahub/private/private_zip/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 403)
 
