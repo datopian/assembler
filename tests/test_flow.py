@@ -36,8 +36,8 @@ def run_factory(dir='.', config=configs):
     response = upload(token, flow, registry, public_key, config=config)
 
     subprocess.call(['dpp', 'run', 'dirty'],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL
+                        # stdout=subprocess.DEVNULL,
+                        # stderr=subprocess.DEVNULL
                     )
     revision = registry.get_revision_by_dataset_id(response['id'])
     registry.delete_pipelines(response['id'] + '/' + str(revision['revision']))
@@ -174,11 +174,32 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         self.assertEqual(len(paths), 2)
-        path = paths['datapackage_report']
+        path = paths['validation_report']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         report = res.json()
         self.assertTrue(report[0]['valid'])
+
+
+    def test_generates_invalid_reports(self):
+        config = {'allowed_types': ['source/tabular', 'derived/report']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/invalid_file'), config=config)
+        res = requests.get(
+                '{}{}/datahub/invalid-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        self.assertEqual(len(paths), 2)
+        path = paths['validation_report']
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertFalse(report[0]['valid'])
+        self.assertEqual(report[0]['error-count'], 20)
+        self.assertEqual(report[0]['tables'][0]['errors'][0]['code'], 'type-or-format-error')
 
 
     def test_generates_without_preview_if_small_enough(self):
@@ -258,8 +279,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['datapackage_report']
-        assert path.startswith('{}{}/datahub/single-file/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/single-file/validation_report/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         report = res.json()
@@ -357,8 +378,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_emails.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['datapackage_report']
-        assert path.startswith('{}{}/datahub/multiple-files/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/multiple-files/validation_report/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         report = res.json()
@@ -434,8 +455,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['datapackage_report']
-        assert path.startswith('{}{}/datahub/excel/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/excel/validation_report/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         report = res.json()
@@ -509,8 +530,8 @@ class TestFlow(unittest.TestCase):
         exp_json = json.load(open('../../outputs/json/sample_birthdays.json'))
         self.assertListEqual(exp_json, res.json())
 
-        path = paths['datapackage_report']
-        assert path.startswith('{}{}/datahub/single-file-processed/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/single-file-processed/validation_report/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
         report = res.json()
@@ -584,8 +605,8 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 403)
 
-        path = paths['datapackage_report']
-        assert path.startswith('{}{}/datahub/private/datapackage_report/data'.format(S3_SERVER, self.bucket_name))
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/private/validation_report/data'.format(S3_SERVER, self.bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 403)
 

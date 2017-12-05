@@ -6,7 +6,7 @@ from datapackage_pipelines.wrapper import spew, ingest
 from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 
 parameters, datapackage, res_iter = ingest()
-report_name = 'datapackage_report.json'
+report_name = 'validation_report.json'
 
 
 def generate_report(datapackage_):
@@ -14,11 +14,18 @@ def generate_report(datapackage_):
     dp = Package(datapackage_)
 
     for resource in dp.resources:
+        # Handle if skip_rows is integer
+        skip_rows = resource.descriptor.get('skip_rows', [])
+        if isinstance(skip_rows, int):
+            skip_rows = [a for a in range(skip_rows + 1)]
+        resource.descriptor['skip_rows'] = skip_rows
+
+        # Validate
         report = validate(
-            resource.descriptor['path'],
-            preset='datapackage',
-            schema=resource.descriptor,
+            resource.descriptor[PROP_STREAMED_FROM],
+            **resource.descriptor
         )
+        report["resource"] = resource.name
         reports.append(report)
 
     with open(report_name, 'w') as f:
@@ -31,9 +38,9 @@ dp_report = {
     'name': datapackage['name']+'-report',
     'resources': [{
         PROP_STREAMED_FROM: report_name,
-        'name': 'datapackage_report',
+        'name': 'validation_report',
         'format': 'json',
-        'path': 'data/datapackage_report.json',
+        'path': 'data/validation_report.json',
         'datahub': {
           'type': "derived/report",
         },

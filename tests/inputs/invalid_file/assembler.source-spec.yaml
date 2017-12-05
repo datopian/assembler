@@ -1,0 +1,30 @@
+meta:
+  dataset: invalid-file
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  url: datapackage.json
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays.csv
+    descriptor:
+      name: invalid-file
+      resources:
+        -
+          name: birthdays
+          path: data/birthdays.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: date
+                type: date
+              -
+                name: first_name
+                type: date
+              -
+                name: last_name
+                type: string
