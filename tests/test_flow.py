@@ -39,8 +39,8 @@ def run_factory(dir='.', config=configs):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                     )
-    revision = registry.get_revision_by_dataset_id(response['id'])
-    registry.delete_pipelines(response['id'] + '/' + str(revision['revision']))
+    revision = registry.get_revision(response['dataset_id'])
+    registry.delete_pipelines(response['dataset_id']+'/'+str(revision['revision']))
     os.remove('.dpp.db')
 
 def generate_token(owner):
@@ -83,7 +83,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/non_tabular'), config=config)
         res = requests.get(
-            '{}{}/datahub/non-tabular/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/non-tabular/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -100,7 +100,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -117,7 +117,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -134,7 +134,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -151,7 +151,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -167,7 +167,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -186,7 +186,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/invalid_file'), config=config)
         res = requests.get(
-                '{}{}/datahub/invalid-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+                '{}{}/datahub/invalid-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -208,7 +208,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -230,7 +230,7 @@ class TestFlow(unittest.TestCase):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/preview'), config=config)
         res = requests.get(
-            '{}{}/datahub/needs-preview/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/needs-preview/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -251,7 +251,7 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/single_file'))
 
         res = requests.get(
-            '{}{}/datahub/single-file/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -331,7 +331,7 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/multiple_files'))
 
         res = requests.get(
-            '{}{}/datahub/multiple-files/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/multiple-files/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
 
         paths = dict(
             (r['name'], r['path'])
@@ -429,7 +429,7 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/excel'))
 
         res = requests.get(
-            '{}{}/datahub/excel/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/excel/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
         paths = dict(
             (r['name'], r['path'])
             for r in res['resources']
@@ -503,7 +503,7 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/needs_processing'))
 
         res = requests.get(
-            '{}{}/datahub/single-file-processed/latest/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+            '{}{}/datahub/single-file-processed/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
         paths = dict(
             (r['name'], r['path'])
             for r in res['resources']
@@ -578,9 +578,9 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/private_dataset'))
 
         res = requests.get(
-            '{}{}/datahub/private/latest/datapackage.json'.format(S3_SERVER, self.bucket_name))
+            '{}{}/datahub/private/1/datapackage.json'.format(S3_SERVER, self.bucket_name))
         self.assertEqual(res.status_code, 403)
-        obj = self.s3.Object(self.bucket_name, 'datahub/private/latest/datapackage.json')
+        obj = self.s3.Object(self.bucket_name, 'datahub/private/1/datapackage.json')
         dp = obj.get()['Body'].read().decode('utf-8')
         dp = json.loads(dp)
         paths = dict(
