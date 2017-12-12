@@ -37,6 +37,7 @@ before_script:
   - sleep 30
   - curl localhost:9200
   - curl localhost:5000
+  - curl localhost:4000
   - psql -U postgres -c "create user datahub password 'secret' createdb;"
   - psql -U postgres -c "create database datahq owner=datahub;"
 
