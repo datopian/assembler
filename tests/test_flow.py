@@ -1,10 +1,9 @@
 import json
-
-import filemanager
 import jwt
 import os
 import requests
 import subprocess
+import time
 import unittest
 import yaml
 
@@ -12,12 +11,17 @@ import boto3
 from elasticsearch import Elasticsearch
 
 ES_SERVER = os.environ['DPP_ELASTICSEARCH'] = 'http://localhost:9200'
+ES_SERVER = os.environ['EVENTS_ELASTICSEARCH_HOST'] = 'http://localhost:9200'
 S3_SERVER = os.environ['S3_ENDPOINT_URL'] = 'http://localhost:5000/'
 os.environ['PKGSTORE_BUCKET'] = 'testing.datahub.io'
 os.environ['AWS_ACCESS_KEY_ID'] = 'foo'
 os.environ['AWS_SECRET_ACCESS_KEY'] = 'bar'
 os.environ['SOURCESPEC_REGISTRY_DB_ENGINE'] = DB_ENGINE = 'postgres://datahub:secret@localhost/datahq'
+os.environ['FILEMANAGER_DATABASE_URL'] = 'postgres://datahub:secret@localhost/datahq'
+os.environ['DATABASE_URL'] = 'postgres://datahub:secret@localhost/datahq'
+os.environ['FLOWMANAGER_HOOK_URL'] = 'http://localhost:4000/source/update'
 
+import filemanager
 import flowmanager.controllers
 from flowmanager.models import FlowRegistry
 from sqlalchemy import create_engine
@@ -40,7 +44,7 @@ def run_factory(dir='.', config=configs):
 
     try:
         out = subprocess.check_output(['dpp', 'run', 'dirty'],
-                                      stderr=subprocess.STDOUT
+                                    #   stderr=subprocess.STDOUT
                                     )
         # print(out.decode('utf8'))
         revision = registry.get_revision(response['dataset_id'])
@@ -320,21 +324,21 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # self.assertEqual(res.status_code, 200)
-        #
-        # events = res.json()
-        # hits = [hit['_source'] for hit in events['hits']['hits']
-        #     if hit['_source']['dataset'] == 'single-file']
-        # self.assertEqual(len(hits), 1)
-        #
-        # event = hits[0]
-        # self.assertEqual(event['dataset'],'single-file')
-        # self.assertEqual(event['event_action'],'finished')
-        # self.assertEqual(event['event_entity'], 'flow')
-        # self.assertEqual(event['owner'], 'datahub')
-        # self.assertEqual(event['status'], 'OK')
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'single-file']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['dataset'],'single-file')
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
 
 
     def test_multiple_file(self):
@@ -419,20 +423,20 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 40)
         self.assertEqual(len(datapackage['resources']), 8)
 
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # self.assertEqual(res.status_code, 200)
-        #
-        # events = res.json()
-        # hits = [hit['_source'] for hit in events['hits']['hits']
-        #     if hit['_source']['dataset'] == 'multiple-files']
-        # self.assertEqual(len(hits), 1)
-        #
-        # event = hits[0]
-        # self.assertEqual(event['event_action'],'finished')
-        # self.assertEqual(event['event_entity'], 'flow')
-        # self.assertEqual(event['owner'], 'datahub')
-        # self.assertEqual(event['status'], 'OK')
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'multiple-files']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
 
 
     def test_excel_file(self):
@@ -494,20 +498,20 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # self.assertEqual(res.status_code, 200)
-        #
-        # events = res.json()
-        # hits = [hit['_source'] for hit in events['hits']['hits']
-        #     if hit['_source']['dataset'] == 'excel']
-        # self.assertEqual(len(hits), 1)
-        #
-        # event = hits[0]
-        # self.assertEqual(event['event_action'],'finished')
-        # self.assertEqual(event['event_entity'], 'flow')
-        # self.assertEqual(event['owner'], 'datahub')
-        # self.assertEqual(event['status'], 'OK')
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'excel']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
 
     def test_needs_processing(self):
         run_factory(os.path.join(os.path.dirname(
@@ -554,6 +558,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Elasticsearch
+        time.sleep(5)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -569,20 +574,19 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # self.assertEqual(res.status_code, 200)
-        #
-        # events = res.json()
-        # hits = [hit['_source'] for hit in events['hits']['hits']
-        #     if hit['_source']['dataset'] == 'single-file-processed']
-        # self.assertEqual(len(hits), 1)
-        #
-        # event = hits[0]
-        # self.assertEqual(event['event_action'],'finished')
-        # self.assertEqual(event['event_entity'], 'flow')
-        # self.assertEqual(event['owner'], 'datahub')
-        # self.assertEqual(event['status'], 'OK')
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'single-file-processed']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
 
     def test_private_dataset(self):
         run_factory(os.path.join(os.path.dirname(
@@ -643,21 +647,21 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # self.assertEqual(res.status_code, 200)
-        #
-        # events = res.json()
-        # hits = [hit['_source'] for hit in events['hits']['hits']
-        #     if hit['_source']['dataset'] == 'private']
-        # self.assertEqual(len(hits), 1)
-        #
-        # event = hits[0]
-        # self.assertEqual(event['dataset'],'private')
-        # self.assertEqual(event['event_action'],'finished')
-        # self.assertEqual(event['event_entity'], 'flow')
-        # self.assertEqual(event['owner'], 'datahub')
-        # self.assertEqual(event['status'], 'OK')
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'private']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['dataset'],'private')
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
 
     def test_elasticsearch_saves_multiple_datasets_and_events(self):
         # Run flow
@@ -666,10 +670,10 @@ class TestFlow(unittest.TestCase):
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 1)
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # events = res.json()
-        # self.assertEqual(events['hits']['total'], 1)
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        events = res.json()
+        self.assertEqual(events['hits']['total'], 1)
 
         # Second flow
         run_factory(os.path.join(os.path.dirname(
@@ -677,10 +681,10 @@ class TestFlow(unittest.TestCase):
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 2)
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # events = res.json()
-        # self.assertEqual(events['hits']['total'], 2)
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        events = res.json()
+        self.assertEqual(events['hits']['total'], 2)
 
         # Third flows
         run_factory(os.path.join(os.path.dirname(
@@ -688,10 +692,10 @@ class TestFlow(unittest.TestCase):
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 3)
-        # TODO comment me out after #70 is fixed
-        # res = requests.get('http://localhost:9200/events/_search')
-        # events = res.json()
-        # self.assertEqual(events['hits']['total'], 3)
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/events/_search')
+        events = res.json()
+        self.assertEqual(events['hits']['total'], 3)
 
     ## TODO run flow, update metadata, run again
     # def test_quick_succession_local(self):
@@ -704,9 +708,3 @@ class TestFlow(unittest.TestCase):
     #         os.path.realpath(__file__)), 'inputs/local/needs_processing'))
     #     elapsed_time_second_run = time.time() - start_time
     #     self.assertTrue(time_elapsed_first_run > elapsed_time_second_run)
-
-    # @classmethod
-    # def teardown_class(self):
-    #     # for obj in self.bucket.objects.all():
-    #     #     obj.delete()
-    #     # self.bucket.delete()
