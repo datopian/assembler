@@ -1,8 +1,10 @@
 import copy
+import datetime
+import os
 
+import filemanager
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-from datapackage_pipelines.wrapper import ingest, spew # noqa
 from datapackage_pipelines_aws.s3_dumper import S3Dumper
 
 
@@ -19,6 +21,7 @@ SCHEMA = {
                  {'name': 'owner', 'type': 'string'},
                  {'name': 'ownerid', 'type': 'string'},
                  {'name': 'findability', 'type': 'string'},
+                 {'name': 'flowid', 'type': 'string'},
                  {'name': 'stats', 'type': 'object', 'es:schema': {
                     'fields': [
                         {'name': 'rowcount', 'type': 'integer'},
@@ -60,18 +63,48 @@ def dataset_resource(dp):
 
 class MyS3Dumper(S3Dumper):
 
+    def __init__(self):
+        super(MyS3Dumper, self).__init__()
+        self.fm = filemanager.FileManager(os.environ.get('FILEMANAGER_DATABASE_URL'))
+
+    def initialize(self, params):
+        super(MyS3Dumper, self).initialize(params)
+        self.final = params.get('final', False)
+
     def prepare_datapackage(self, datapackage, params):
         datapackage = super(MyS3Dumper, self).prepare_datapackage(datapackage, params)
-        return modify_datapackage(datapackage)
+        if self.final:
+            return modify_datapackage(datapackage)
+        else:
+            return datapackage
 
     def handle_datapackage(self, datapackage, parameters, stats):
-        dp = copy.deepcopy(datapackage)
-        dp['resources'].pop()
+        if self.final:
+            dp = copy.deepcopy(datapackage)
+            dp['resources'].pop()
+        else:
+            dp = datapackage
         return super(MyS3Dumper, self).handle_datapackage(dp, parameters, stats)
 
     def handle_resources(self, datapackage, resource_iterator, parameters, stats):
         yield from super(MyS3Dumper, self).handle_resources(datapackage, resource_iterator, parameters, stats)
-        yield dataset_resource(datapackage)
+        if self.final:
+            yield dataset_resource(datapackage)
+
+    def put_object(self, **kwargs):
+        super(MyS3Dumper, self).put_object(**kwargs)
+        datahub = self.datapackage['datahub']
+        self.fm.add_file(
+            kwargs['Bucket'],
+            kwargs['Key'],
+            datahub.get('findability'),
+            datahub.get('owner'),
+            datahub.get('ownerid'),
+            self.datapackage.get('id'),
+            datahub.get('flowid'),
+            os.stat(kwargs['Body'].name).st_size,
+            datetime.datetime.now()
+        )
 
 
 if __name__ == "__main__":

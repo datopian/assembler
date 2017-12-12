@@ -20,16 +20,20 @@ python:
 env:
   global:
     - TOXENV="py${PYTHON_VERSION//./}"
+    - DATABASE_URL=postgres://datahub:secret@localhost/datahq
 
 install:
   - make install
   - pip install coveralls
+  - git clone https://github.com/datahq/specstore
+  - pip install -r specstore/requirements.txt
 
 script:
   - make test
 
 before_script:
   - moto_server &
+  - cd specstore && gunicorn -b 127.0.0.1:4000 server:app &
   - sleep 30
   - curl localhost:9200
   - curl localhost:5000

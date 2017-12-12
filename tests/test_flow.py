@@ -1,4 +1,6 @@
 import json
+
+import filemanager
 import jwt
 import os
 import requests
@@ -35,13 +37,19 @@ def run_factory(dir='.', config=configs):
     token = generate_token(flow['meta']['owner'])
     response = upload(token, flow, registry, public_key, config=config)
 
-    subprocess.call(['dpp', 'run', 'dirty'],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                    )
-    revision = registry.get_revision(response['dataset_id'])
-    registry.delete_pipelines(response['dataset_id']+'/'+str(revision['revision']))
-    os.remove('.dpp.db')
+
+    try:
+        out = subprocess.check_output(['dpp', 'run', 'dirty'],
+                                      stderr=subprocess.STDOUT
+                                    )
+        # print(out.decode('utf8'))
+        revision = registry.get_revision(response['dataset_id'])
+        registry.delete_pipelines(response['dataset_id']+'/'+str(revision['revision']))
+        os.remove('.dpp.db')
+    except subprocess.CalledProcessError as e:
+        print(e.output.decode('utf8'))
+        raise
+
 
 def generate_token(owner):
     ret = {
@@ -56,11 +64,13 @@ def generate_token(owner):
 class TestFlow(unittest.TestCase):
 
     def setUp(self):
+        fm = filemanager.FileManager(os.environ['FILEMANAGER_DATABASE_URL'])
+        filemanager.models.Base.metadata.create_all(fm.engine)
         es = Elasticsearch(hosts=[ES_SERVER])
         es.indices.delete(index='datahub', ignore=[400, 404])
         es.indices.delete(index='events', ignore=[400, 404])
         es.indices.flush()
-        for tbl in ('pipelines', 'dataset', 'dataset_revision'):
+        for tbl in ('pipelines', 'dataset', 'dataset_revision', 'storedfiles'):
             try:
                 create_engine(DB_ENGINE).execute('DELETE FROM %s' % tbl)
             except:
@@ -77,6 +87,7 @@ class TestFlow(unittest.TestCase):
             pass
         for obj in self.bucket.objects.all():
                 obj.delete()
+
 
     def test_coppies_accross_the_non_tabular_source(self):
         config = {'allowed_types': ['source/non-tabular']}

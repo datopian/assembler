@@ -34,19 +34,16 @@ def generate_report(datapackage_):
 
 generate_report(datapackage)
 
-dp_report = {
-    'name': datapackage['name']+'-report',
-    'resources': [{
-        PROP_STREAMED_FROM: report_name,
-        'name': 'validation_report',
-        'format': 'json',
-        'path': 'data/validation_report.json',
-        'datahub': {
-          'type': "derived/report",
-        },
-        'description': 'Validation report for tabular data'
-    }]
-}
+datapackage['name'] += '-report'
+datapackage['resources'] = [{
+    PROP_STREAMED_FROM: report_name,
+    'name': 'validation_report',
+    'format': 'json',
+    'path': 'data/validation_report.json',
+    'datahub': {
+      'type': "derived/report",
+    },
+    'description': 'Validation report for tabular data'
+}]
 
-
-spew(dp_report, [])
+spew(datapackage, [])

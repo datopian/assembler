@@ -27,7 +27,8 @@ def modify_datapackage(dp, parameters, stats):
         view = dp_.descriptor.get('views', [])
         views += view
         # Skip creation of preview resources if original resource is already small
-        if dp_.descriptor['datahub']['stats'].get('rowcount') == 0:
+        datahub = dp_.descriptor['datahub']
+        if 'stats' in datahub and datahub['stats'].get('rowcount') == 0:
             continue
 
         for resource_ in dp_.resources:
@@ -46,8 +47,10 @@ def modify_datapackage(dp, parameters, stats):
             dp['resources'].append(descriptor)
 
     dp['views'] = views
-    dp['datahub']['stats']['rowcount'] = row_count
-    dp['datahub']['stats']['bytes'] = bytes
+    dp['datahub'].setdefault('stats', {}).update(dict(
+        rowcount=row_count,
+        bytes=bytes
+    ))
 
     return dp
 
