@@ -21,6 +21,7 @@ os.environ['FILEMANAGER_DATABASE_URL'] = 'postgres://datahub:secret@localhost/da
 os.environ['DATABASE_URL'] = 'postgres://datahub:secret@localhost/datahq'
 os.environ['FLOWMANAGER_HOOK_URL'] = 'http://localhost:4000/source/update'
 
+
 import filemanager
 import flowmanager.controllers
 from flowmanager.models import FlowRegistry
@@ -31,6 +32,8 @@ configs = flowmanager.controllers.CONFIGS
 
 private_key = open('tests/private.pem').read()
 public_key = open('tests/public.pem').read()
+info_successful = 'http://localhost:4000/source/datahub/%s/successful'
+info_latest = 'http://localhost:4000/source/datahub/%s/latest'
 
 registry = FlowRegistry(DB_ENGINE)
 
@@ -69,11 +72,15 @@ class TestFlow(unittest.TestCase):
         es.indices.delete(index='datahub', ignore=[400, 404])
         es.indices.delete(index='events', ignore=[400, 404])
         es.indices.flush()
-        for tbl in ('pipelines', 'dataset', 'dataset_revision', 'storedfiles'):
+
+        # you will need to add pipelines table to this list while developing
+        for tbl in ('dataset', 'dataset_revision', 'storedfiles'):
             try:
                 create_engine(DB_ENGINE).execute('DELETE FROM %s' % tbl)
             except:
                 pass
+
+
         self.s3 = boto3.resource(
             service_name='s3',
             endpoint_url=S3_SERVER,
@@ -104,6 +111,18 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
+        # Specstore
+        res = requests.get(info_latest % 'non-tabular')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'non-tabular')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 2)
+        self.assertEqual(info['pipelines']['datahub/non-tabular/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/non-tabular/1/test-geojson']['status'], 'SUCCEEDED')
+
 
     def test_coppies_accross_the_tabular_source(self):
         config = {'allowed_types': ['source/tabular']}
@@ -120,6 +139,18 @@ class TestFlow(unittest.TestCase):
         path = paths['birthdays']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
+
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 2)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
 
 
     def test_generates_only_derived_csv(self):
@@ -138,6 +169,19 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv']['status'], 'SUCCEEDED')
+
 
     def test_generates_only_derived_json(self):
         config = {'allowed_types': ['source/tabular', 'derived/json']}
@@ -154,6 +198,19 @@ class TestFlow(unittest.TestCase):
         path = paths['birthdays_json']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
+
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_json']['status'], 'SUCCEEDED')
 
 
     def test_generates_only_derived_zip(self):
@@ -172,6 +229,20 @@ class TestFlow(unittest.TestCase):
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/single-file_zip']['status'], 'SUCCEEDED')
+
+
     def test_generates_reports(self):
         config = {'allowed_types': ['source/tabular', 'derived/report']}
         run_factory(os.path.join(os.path.dirname(
@@ -189,6 +260,19 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         report = res.json()
         self.assertTrue(report[0]['valid'])
+
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
     def test_generates_invalid_reports(self):
@@ -210,6 +294,19 @@ class TestFlow(unittest.TestCase):
         self.assertFalse(report[0]['valid'])
         self.assertEqual(report[0]['error-count'], 20)
         self.assertEqual(report[0]['tables'][0]['errors'][0]['code'], 'type-or-format-error')
+
+        # Specstore
+        res = requests.get(info_latest % 'invalid-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'invalid-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
     def test_generates_without_preview_if_small_enough(self):
@@ -233,6 +330,21 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIsNone(paths.get('birthdays_csv_preview'))
 
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 5)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
 
     def test_generates_preview(self):
         config = {'allowed_types': [
@@ -254,6 +366,20 @@ class TestFlow(unittest.TestCase):
         path = paths['test-preview_csv']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
+
+        # Specstore
+        res = requests.get(info_latest % 'needs-preview')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'needs-preview')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 4)
+        self.assertEqual(info['pipelines']['datahub/needs-preview/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/needs-preview/1/test-preview']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/needs-preview/1/test-preview_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/needs-preview/1/test-preview_csv_preview']['status'], 'SUCCEEDED')
 
 
     def test_single_file(self):
@@ -334,6 +460,23 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['event_entity'], 'flow')
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'single-file')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/single-file_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
 
 
     def test_multiple_file(self):
@@ -433,6 +576,27 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
 
+        # Specstore
+        res = requests.get(info_latest % 'multiple-files')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'multiple-files')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 11)
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_csv_preview']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/multiple-files_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/multiple-files/1/validation_report']['status'], 'SUCCEEDED')
+
 
     def test_excel_file(self):
         run_factory(os.path.join(os.path.dirname(
@@ -507,6 +671,24 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['event_entity'], 'flow')
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'excel')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'excel')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/excel/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/excel_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
 
     def test_needs_processing(self):
         run_factory(os.path.join(os.path.dirname(
@@ -583,6 +765,24 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
 
+        # Specstore
+        res = requests.get(info_latest % 'single-file-processed')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file-processed')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/single-file-processed_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
+
     def test_private_dataset(self):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/private_dataset'))
@@ -657,6 +857,24 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(event['event_entity'], 'flow')
         self.assertEqual(event['owner'], 'datahub')
         self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'private')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'private')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/private/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/private_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/private/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
 
     def test_elasticsearch_saves_multiple_datasets_and_events(self):
         # Run flow
