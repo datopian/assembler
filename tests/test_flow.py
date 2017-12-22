@@ -309,6 +309,25 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(info['pipelines']['datahub/invalid-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
+    def test_all_pipeline_statuses_are_updated_after_fail(self):
+        config = {'allowed_types': ['source/tabular', 'derived/report', 'derived/csv']}
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/invalid_file'), config=config)
+
+        # Specstore
+        time.sleep(5)
+        res = requests.get(info_latest % 'invalid-file')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'FAILED')
+        self.assertEqual(len(info['pipelines']), 4)
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1']['status'], 'FAILED')
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays_csv']['status'], 'FAILED')
+        self.assertEqual(info['pipelines']['datahub/invalid-file/1/validation_report']['status'], 'SUCCEEDED')
+
+
     def test_generates_without_preview_if_small_enough(self):
         config = {'allowed_types': [
             'source/tabular', 'derived/csv', 'derived/json', 'derived/preview']}
