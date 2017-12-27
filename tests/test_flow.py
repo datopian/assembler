@@ -802,6 +802,99 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
 
 
+    def test_needs_processing_dpp(self):
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/needs_processing_dpp'))
+
+        res = requests.get(
+            '{}{}/datahub/single-file-processed-dpp/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+
+        path = paths['birthdays']
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(exp_csv, res.text)
+
+        path = paths['birthdays_csv']
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays_csv/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        exp_csv = open('../../outputs/csv/sorted_birthdays.csv').read()
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
+
+        path = paths['birthdays_json']
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays_json/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        exp_json = json.load(open('../../outputs/json/sorted_birthdays.json'))
+        self.assertListEqual(exp_json, res.json())
+
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/validation_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
+        path = paths['single-file-processed-dpp_zip']
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/single-file-processed-dpp_zip/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+        # Elasticsearch
+        time.sleep(5)
+        res = requests.get('http://localhost:9200/datahub/_search')
+        self.assertEqual(res.status_code, 200)
+
+        meta = res.json()
+        hits = [hit['_source'] for hit in meta['hits']['hits']
+            if hit['_source']['datapackage']['name'] == 'single-file-processed-dpp']
+        self.assertEqual(len(hits), 1)
+
+        datahub = hits[0]['datahub']
+        datapackage = hits[0]['datapackage']
+        self.assertEqual(datahub['findability'],'published')
+        self.assertEqual(datahub['owner'],'datahub')
+        self.assertEqual(datahub['stats']['rowcount'], 20)
+        self.assertEqual(len(datapackage['resources']), 5)
+
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'single-file-processed-dpp']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'single-file-processed-dpp')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'single-file-processed-dpp')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/single-file-processed-dpp_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
+
     def test_private_dataset(self):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/private_dataset'))

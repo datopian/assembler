@@ -1,0 +1,40 @@
+meta:
+  dataset: single-file-processed-dpp
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  url: datapackage.json
+  parameters:
+    resource-mapping:
+      birthdays: ../../data/sample_birthdays.csv
+    descriptor:
+      name: single-file-processed-dpp
+      resources:
+        -
+          name: birthdays
+          path: data/birthdays.csv
+          format: csv
+          schema:
+            fields:
+              -
+                name: date
+                type: date
+              -
+                name: first_name
+                type: string
+              -
+                name: last_name
+                type: string
+processing:
+  -
+    input: birthdays
+    dpp:
+      -
+        run: sort
+        parameters:
+          resources: birthdays
+          sort-by: "{date}"
+    output: birthdays

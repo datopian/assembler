@@ -1,0 +1,27 @@
+{
+  "name": "single-file-processed-dpp",
+  "resources": [
+    {
+      "name": "birthdays",
+      "path": "data/birthdays.csv",
+      "format": "csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "name": "first_name",
+            "type": "string"
+          },
+          {
+            "name": "last_name",
+            "type": "string"
+          }
+        ],
+        "primaryKey": "date"
+      }
+    }
+  ]
+}
