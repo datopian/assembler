@@ -24,6 +24,7 @@ env:
     - PKGSTORE_BUCKET=testing.datahub.io
     - AWS_ACCESS_KEY_ID=foo
     - AWS_SECRET_ACCESS_KEY=bar
+    - S3_ENDPOINT_URL=http://localhost:5000/
 
 install:
   - make install
