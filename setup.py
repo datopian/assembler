@@ -23,8 +23,7 @@ INSTALL_REQUIRES = [
     'psycopg2',
     'tweepy',
     'facebook-sdk',
-    'google-api-python-client==1.5.3',
-    'datapackage-pipelines-elasticsearch'
+    'google-api-python-client==1.5.3'
 ]
 DEPENDENCY_LINKS=[
     'https://github.com/datahq/specstore/archive/master.zip'

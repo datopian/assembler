@@ -315,7 +315,7 @@ class TestFlow(unittest.TestCase):
             os.path.realpath(__file__)), 'inputs/invalid_file'), config=config)
 
         # Specstore
-        time.sleep(5)
+        time.sleep(10)
         res = requests.get(info_latest % 'invalid-file')
         self.assertEqual(res.status_code, 200)
 
@@ -448,6 +448,7 @@ class TestFlow(unittest.TestCase):
         # TODO: compare zip files
 
         # Elasticsearch
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -464,7 +465,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -565,6 +565,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Elasticsearch
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -580,7 +581,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 40)
         self.assertEqual(len(datapackage['resources']), 8)
 
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -661,6 +661,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Elasticsearch
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -676,7 +677,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -754,7 +754,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Elasticsearch
-        time.sleep(5)
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -847,7 +847,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Elasticsearch
-        time.sleep(5)
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -938,6 +938,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(res.status_code, 403)
 
         # Elasticsearch
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -954,7 +955,6 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['stats']['rowcount'], 20)
         self.assertEqual(len(datapackage['resources']), 5)
 
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
 
@@ -992,10 +992,10 @@ class TestFlow(unittest.TestCase):
         # Run flow
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'))
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 1)
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         events = res.json()
         self.assertEqual(events['hits']['total'], 1)
@@ -1003,10 +1003,10 @@ class TestFlow(unittest.TestCase):
         # Second flow
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/multiple_files'))
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 2)
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         events = res.json()
         self.assertEqual(events['hits']['total'], 2)
@@ -1014,10 +1014,10 @@ class TestFlow(unittest.TestCase):
         # Third flows
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/excel'))
+        time.sleep(15)
         res = requests.get('http://localhost:9200/datahub/_search')
         meta = res.json()
         self.assertEqual(meta['hits']['total'], 3)
-        time.sleep(5)
         res = requests.get('http://localhost:9200/events/_search')
         events = res.json()
         self.assertEqual(events['hits']['total'], 3)
