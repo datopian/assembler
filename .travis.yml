@@ -21,6 +21,9 @@ env:
   global:
     - TOXENV="py${PYTHON_VERSION//./}"
     - DATABASE_URL=postgres://datahub:secret@localhost/datahq
+    - PKGSTORE_BUCKET=testing.datahub.io
+    - AWS_ACCESS_KEY_ID=foo
+    - AWS_SECRET_ACCESS_KEY=bar
 
 install:
   - make install
