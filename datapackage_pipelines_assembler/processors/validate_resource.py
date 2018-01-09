@@ -1,4 +1,6 @@
 import json
+from tempfile import mkdtemp
+from os import path
 
 from datapackage import Package
 from goodtables import validate
@@ -6,7 +8,7 @@ from datapackage_pipelines.wrapper import spew, ingest
 from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 
 parameters, datapackage, res_iter = ingest()
-report_name = 'validation_report.json'
+report_name = path.join(mkdtemp(), 'validation_report.json')
 
 
 def generate_report(datapackage_):
