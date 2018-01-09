@@ -311,8 +311,11 @@ class TestFlow(unittest.TestCase):
 
     def test_all_pipeline_statuses_are_updated_after_fail(self):
         config = {'allowed_types': ['source/tabular', 'derived/report', 'derived/csv']}
-        run_factory(os.path.join(os.path.dirname(
+        try:
+            run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/invalid_file'), config=config)
+        except:
+            pass
 
         # Specstore
         time.sleep(10)
