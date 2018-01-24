@@ -1,3 +1,4 @@
+https://github.com/datahq/auth/archive/master.zip
 https://github.com/datahq/planner/archive/master.zip
 https://github.com/datahq/specstore/archive/master.zip
 https://github.com/datahq/events/archive/master.zip
