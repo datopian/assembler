@@ -25,11 +25,14 @@ env:
     - AWS_ACCESS_KEY_ID=foo
     - AWS_SECRET_ACCESS_KEY=bar
     - S3_ENDPOINT_URL=http://localhost:5000/
+    - AUTH_SERVER=localhost:3000
+    - PUBLIC_KEY=foo
 
 install:
   - make install
   - pip install coveralls
   - git clone https://github.com/datahq/specstore
+  - git clone https://github.com/datahq/auth
   - pip install -r specstore/requirements.txt
   - pip install gunicorn
 
@@ -37,14 +40,17 @@ script:
   - make test
 
 before_script:
+  - psql -U postgres -c "create user datahub password 'secret' createdb;"
+  - psql -U postgres -c "create database datahq owner=datahub;"
   - moto_server &
+  - cd auth && gunicorn -b 127.0.0.1:3000 server:app &
+  - sleep 30
   - cd specstore && gunicorn -b 127.0.0.1:4000 server:app &
   - sleep 30
   - curl localhost:9200
   - curl localhost:5000
   - curl localhost:4000
-  - psql -U postgres -c "create user datahub password 'secret' createdb;"
-  - psql -U postgres -c "create database datahq owner=datahub;"
+  - curl localhost:3000
 
 after_success:
   - coveralls
