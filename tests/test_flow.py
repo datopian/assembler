@@ -76,8 +76,7 @@ class TestFlow(unittest.TestCase):
         es.indices.delete(index='events', ignore=[400, 404])
         es.indices.flush()
 
-        # you will need to add pipelines table to this list while developing
-        for tbl in ('dataset', 'dataset_revision', 'storedfiles'):
+        for tbl in ('pipelines','dataset', 'dataset_revision', 'storedfiles'):
             try:
                 create_engine(DB_ENGINE).execute('DELETE FROM %s' % tbl)
             except:

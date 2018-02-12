@@ -2,6 +2,7 @@ import os
 
 import copy
 import datapackage
+import itertools
 import logging
 from datapackage import Resource  # noqa
 from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
@@ -25,7 +26,8 @@ def modify_datapackage(dp, parameters, stats):
         logging.info('URL: %s', url)
         dp_ = datapackage.DataPackage(url)
         view = dp_.descriptor.get('views', [])
-        views += view
+        # Deduplicate views: Eg: All derived datasets may have same views
+        views += list(itertools.filterfalse(lambda x: x in views, view))
         # Skip creation of preview resources if original resource is already small
         datahub = dp_.descriptor['datahub']
         if 'stats' in datahub and datahub['stats'].get('rowcount') == 0:
