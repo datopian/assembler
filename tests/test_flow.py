@@ -47,8 +47,7 @@ def run_factory(dir='.', config=configs):
 
 
     try:
-        out = subprocess.check_output(['dpp', 'run', 'dirty'], stderr=subprocess.STDOUT)
-        os.remove('.dpp.db')
+        out = subprocess.check_output(['dpp', 'run', 'all'], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         print(e.output.decode('utf8'))
         raise
@@ -991,6 +990,102 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(info['pipelines']['datahub/private/1/private_zip']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/validation_report']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
+
+
+    def test_works_with_all_schema_types(self):
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/all_schema_types'))
+
+        res = requests.get(
+            '{}{}/datahub/all-schema-types/1/datapackage.json'.format(S3_SERVER, self.bucket_name)).json()
+
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+        path = paths['schema-types']
+        assert path.startswith('{}{}/datahub/all-schema-types/schema-types/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+
+        exp_csv = open('../../outputs/csv/sample_schema-types.csv').read()
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(exp_csv, res.text)
+
+        path = paths['schema-types_csv']
+        assert path.startswith('{}{}/datahub/all-schema-types/schema-types_csv/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+
+        path = paths['schema-types_json']
+        assert path.startswith('{}{}/datahub/all-schema-types/schema-types_json/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        exp_json = json.load(open('../../outputs/json/sample_schema-types.json'))
+        self.assertListEqual(exp_json, res.json())
+
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/all-schema-types/validation_report/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
+        path = paths['all-schema-types_zip']
+        assert path.startswith('{}{}/datahub/all-schema-types/all-schema-types_zip/data'.format(S3_SERVER, self.bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        # TODO: compare zip files
+
+        # Elasticsearch
+        time.sleep(15)
+        res = requests.get('http://localhost:9200/datahub/_search')
+        self.assertEqual(res.status_code, 200)
+
+        meta = res.json()
+        hits = [hit['_source'] for hit in meta['hits']['hits']
+            if hit['_source']['datapackage']['name'] == 'all-schema-types']
+
+        self.assertEqual(len(hits), 1)
+
+        datahub = hits[0]['datahub']
+        datapackage = hits[0]['datapackage']
+        self.assertEqual(datahub['findability'],'published')
+        self.assertEqual(datahub['owner'],'datahub')
+        self.assertEqual(datahub['stats']['rowcount'], 2)
+        self.assertEqual(len(datapackage['resources']), 5)
+
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'all-schema-types']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['dataset'],'all-schema-types')
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'all-schema-types')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'all-schema-types')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 7)
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_csv']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_json']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/all-schema-types_zip']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/validation_report']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_csv_preview']['status'], 'SUCCEEDED')
 
 
     def test_elasticsearch_saves_multiple_datasets_and_events(self):

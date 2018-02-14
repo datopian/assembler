@@ -1,0 +1,54 @@
+{
+  "name": "all-schema-types",
+  "resources": [
+    {
+      "name": "schema-types",
+      "path": "data/schema-types.csv",
+      "format": "csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "number",
+            "type": "number"
+          },
+          {
+            "name": "integer",
+            "type": "integer"
+          },
+          {
+            "name": "string",
+            "type": "string"
+          },
+          {
+            "name": "boolean",
+            "type": "boolean"
+          },
+          {
+            "name": "object",
+            "type": "object"
+          },
+          {
+            "name": "array",
+            "type": "array"
+          },
+          {
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "name": "time",
+            "type": "time"
+          },
+          {
+            "name": "datetime",
+            "type": "datetime"
+          },
+          {
+            "name": "year",
+            "type": "integer"
+          }
+        ]
+      }
+    }
+  ]
+}
