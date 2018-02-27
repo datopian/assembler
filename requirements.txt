@@ -5,3 +5,4 @@ https://github.com/datahq/events/archive/master.zip
 https://github.com/datahq/filemanager/archive/master.zip
 datapackage-pipelines-aws>=0.0.20
 goodtables>=1.5.1
+dpp-runner>=0.0.6

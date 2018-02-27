@@ -1,3 +1,4 @@
+import hashlib
 import json
 from tempfile import mkdtemp
 from os import path
@@ -33,8 +34,24 @@ def generate_report(datapackage_):
     with open(report_name, 'w') as f:
         json.dump(reports, f)
 
+    hasher = hash_handler(open(report_name, 'rb'))
+    return hasher.hexdigest()
 
-generate_report(datapackage)
+
+def hash_handler(tfile):
+    tfile.seek(0)
+    hasher = hashlib.md5()
+    data = 'x'
+    while len(data) > 0:
+        data = tfile.read(1024)
+        if isinstance(data, str):
+            hasher.update(data.encode('utf8'))
+        elif isinstance(data, bytes):
+            hasher.update(data)
+    return hasher
+
+
+report_hash = generate_report(datapackage)
 
 datapackage['name'] += '-report'
 datapackage['resources'] = [{
@@ -45,6 +62,7 @@ datapackage['resources'] = [{
     'datahub': {
       'type': "derived/report",
     },
+    'hash': report_hash,
     'description': 'Validation report for tabular data'
 }]
 
