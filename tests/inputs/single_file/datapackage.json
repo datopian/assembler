@@ -23,5 +23,6 @@
         "primaryKey": "date"
       }
     }
-  ]
+  ],
+  "readme": "Hello World"
 }

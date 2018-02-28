@@ -112,3 +112,34 @@ class TestIndeedProccessors(unittest.TestCase):
         del result['hash']
 
         self.assertDictEqual(expected, result)
+
+
+    def test_extract_readme(self):
+
+        # Path to the processor we want to test
+        processor_dir = os.path.dirname(datapackage_pipelines_assembler.processors.__file__)
+        processor_path = os.path.join(processor_dir, 'extract_readme.py')
+
+        datapackage = {
+            "name": "test",
+            "resources": [],
+            "readme": "Hellow world"
+        }
+
+        spew_args, _ = mock_processor_test(processor_path, ({}, datapackage,[[]]))
+
+        spew_dp = spew_args[0]
+        spew_res_iter = spew_args[1]
+
+        expected = {
+            "name": "test",
+            "resources": [{
+              "format": "md",
+              "name": "readme",
+              "path": "README.md"
+            }]
+        }
+
+        del spew_dp['resources'][0][PROP_STREAMED_FROM]
+
+        self.assertDictEqual(expected, spew_dp)
