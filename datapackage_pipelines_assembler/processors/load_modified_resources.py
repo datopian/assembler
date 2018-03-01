@@ -8,7 +8,7 @@ from datapackage import Resource  # noqa
 from datapackage_pipelines.utilities.resources import PROP_STREAMED_FROM
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-from datapackage_pipelines.wrapper import process
+from datapackage_pipelines.wrapper import process, get_dependency_datapackage_url
 
 DERIVED_BASE = 'data'
 OTHERS_BASE = 'extra'
@@ -24,6 +24,8 @@ def modify_datapackage(dp, parameters, stats):
 
     for url in urls:
         logging.info('URL: %s', url)
+        if isinstance(url, dict) and 'pipeline' in url:
+            url = get_dependency_datapackage_url(url['pipeline'])
         dp_ = datapackage.DataPackage(url)
         view = dp_.descriptor.get('views', [])
         # Deduplicate views: Eg: All derived datasets may have same views
@@ -43,7 +45,8 @@ def modify_datapackage(dp, parameters, stats):
             if os.environ.get('ASSEMBLER_LOCAL'):
                 descriptor[PROP_STREAMED_FROM] = source
             else:
-                descriptor['path'] = source.replace('s3.amazonaws.com/', '')
+                if 'http' in source:
+                    descriptor['path'] = source.replace('s3.amazonaws.com/', '')
             if PROP_STREAMING in descriptor:
                 del descriptor[PROP_STREAMING]
             dp['resources'].append(descriptor)
