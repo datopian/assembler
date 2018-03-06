@@ -27,6 +27,7 @@ env:
     - S3_ENDPOINT_URL=http://localhost:5000/
     - AUTH_SERVER=localhost:3000
     - PUBLIC_KEY=foo
+    - FLOWMANAGER_VERBOSITY=2
 
 install:
   - make install

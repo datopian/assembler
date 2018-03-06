@@ -10,6 +10,8 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from datapackage_pipelines.wrapper import process, get_dependency_datapackage_url
 
+from planner.utilities import s3_path
+
 DERIVED_BASE = 'data'
 OTHERS_BASE = 'extra'
 DERIVED_FORMATS = ['csv', 'json']
@@ -26,6 +28,7 @@ def modify_datapackage(dp, parameters, stats):
         logging.info('URL: %s', url)
         if isinstance(url, dict) and 'pipeline' in url:
             url = get_dependency_datapackage_url(url['pipeline'])
+        url = s3_path(url)
         dp_ = datapackage.DataPackage(url)
         view = dp_.descriptor.get('views', [])
         # Deduplicate views: Eg: All derived datasets may have same views

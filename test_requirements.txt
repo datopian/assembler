@@ -1,2 +1,1 @@
 -r requirements.txt
--e git+git://github.com/frictionlessdata/datapackage-pipelines.git#egg=datapackage-pipelines
