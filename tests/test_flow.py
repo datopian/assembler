@@ -104,7 +104,7 @@ class TestFlow(unittest.TestCase):
 
 
     def test_coppies_accross_the_non_tabular_source(self):
-        config = {'allowed_types': ['source/non-tabular']}
+        config = {'allowed_types': ['original']}
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/non_tabular'), config=config)
         time.sleep(60)
@@ -134,7 +134,7 @@ class TestFlow(unittest.TestCase):
 
 
     def test_coppies_accross_the_tabular_source(self):
-        config = {'allowed_types': ['source/tabular']}
+        config = {'allowed_types': ['original','source/tabular']}
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         time.sleep(60)
@@ -175,7 +175,7 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), 1)
         path = paths['birthdays_csv']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
@@ -188,9 +188,8 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv']['status'], 'SUCCEEDED')
 
 
@@ -206,7 +205,7 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), 1)
         path = paths['birthdays_json']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
@@ -219,9 +218,8 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_json']['status'], 'SUCCEEDED')
 
 
@@ -237,7 +235,7 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), 1)
         path = paths['single-file_zip']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
@@ -250,9 +248,8 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/single-file_zip']['status'], 'SUCCEEDED')
 
 
@@ -268,7 +265,7 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), 1)
         path = paths['validation_report']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
@@ -283,9 +280,8 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
@@ -301,7 +297,7 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-        self.assertEqual(len(paths), 2)
+        self.assertEqual(len(paths), 1)
         path = paths['validation_report']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
@@ -318,9 +314,8 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 3)
+        self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/invalid-file/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/invalid-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
@@ -335,16 +330,15 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'FAILED')
-        self.assertEqual(len(info['pipelines']), 4)
+        self.assertEqual(len(info['pipelines']), 3)
         self.assertEqual(info['pipelines']['datahub/invalid-file/1']['status'], 'FAILED')
-        self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/invalid-file/1/birthdays_csv']['status'], 'FAILED')
         self.assertEqual(info['pipelines']['datahub/invalid-file/1/validation_report']['status'], 'SUCCEEDED')
 
 
     def test_generates_without_preview_if_small_enough(self):
         config = {'allowed_types': [
-            'source/tabular', 'derived/csv', 'derived/json', 'derived/preview']}
+            'original', 'source/tabular', 'derived/csv', 'derived/json', 'derived/preview']}
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/single_file'), config=config)
         time.sleep(60)
@@ -382,7 +376,7 @@ class TestFlow(unittest.TestCase):
 
     def test_generates_preview(self):
         config = {'allowed_types': [
-            'source/tabular', 'derived/csv', 'derived/preview']}
+            'original', 'source/tabular', 'derived/csv', 'derived/preview']}
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/preview'), config=config)
         time.sleep(60)
@@ -430,7 +424,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
 
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
@@ -528,7 +522,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/multiple-files/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -548,7 +542,7 @@ class TestFlow(unittest.TestCase):
         self.assertListEqual(exp_json, res.json())
 
         path = paths['emails']
-        assert path.startswith('{}{}/datahub/multiple-files/emails/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/emails/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_emails.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -645,7 +639,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/excel/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/excel/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -737,7 +731,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file-processed/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays_invalid.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -828,9 +822,8 @@ class TestFlow(unittest.TestCase):
             (r['name'], r['path'])
             for r in res['resources']
         )
-
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -927,7 +920,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/private/birthdays/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/private/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
 
         self.assertEqual(res.status_code, 403)
@@ -1016,7 +1009,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         path = paths['schema-types']
-        assert path.startswith('{}{}/datahub/all-schema-types/schema-types/data'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/all-schema-types/schema-types/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
 
         exp_csv = open('../../outputs/csv/sample_schema-types.csv').read()
