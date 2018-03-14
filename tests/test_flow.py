@@ -116,7 +116,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         self.assertEqual(len(paths), 1)
-        path = paths['test-geojson_original']
+        path = paths['test-geojson']
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -130,7 +130,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(info['state'], 'SUCCEEDED')
         self.assertEqual(len(info['pipelines']), 2)
         self.assertEqual(info['pipelines']['datahub/non-tabular/1']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/non-tabular/1/test-geojson_original']['status'], 'SUCCEEDED')
+        self.assertEqual(info['pipelines']['datahub/non-tabular/1/test-geojson']['status'], 'SUCCEEDED')
 
 
     def test_coppies_accross_the_tabular_source(self):
@@ -429,15 +429,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-
-        exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/single-file/birthdays_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
 
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
@@ -486,7 +478,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -511,7 +503,7 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/single-file/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file/1/birthdays_csv']['status'], 'SUCCEEDED')
@@ -535,14 +527,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/multiple-files/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/multiple-files/birthdays_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -562,14 +547,7 @@ class TestFlow(unittest.TestCase):
         self.assertListEqual(exp_json, res.json())
 
         path = paths['emails']
-        assert path.startswith('{}{}/datahub/multiple-files/emails/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        exp_csv = open('../../outputs/csv/sample_emails.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['emails_original']
-        assert path.startswith('{}{}/datahub/multiple-files/emails_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/multiple-files/emails/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_emails.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -616,7 +594,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 40)
-        self.assertEqual(len(datapackage['resources']), 10)
+        self.assertEqual(len(datapackage['resources']), 8)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -640,15 +618,13 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 13)
+        self.assertEqual(len(info['pipelines']), 11)
         self.assertEqual(info['pipelines']['datahub/multiple-files/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/multiple-files/1/emails_csv_preview']['status'], 'SUCCEEDED')
@@ -668,12 +644,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/excel/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        self.assertEqual(res.status_code, 200)
-        print(paths)
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/excel/birthdays_original/archive/'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/excel/birthdays/archive/'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         self.assertEqual(res.status_code, 200)
 
@@ -718,7 +689,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -742,10 +713,9 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/excel/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/excel/1/birthdays']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/excel/1/excel_zip']['status'], 'SUCCEEDED')
@@ -766,14 +736,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file-processed/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        exp_csv = open('../../outputs/csv/sample_birthdays_invalid.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/single-file-processed/birthdays_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays_invalid.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -819,7 +782,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -843,10 +806,9 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1/birthdays_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed/1/single-file-processed_zip']['status'], 'SUCCEEDED')
@@ -867,14 +829,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/single-file-processed-dpp/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_birthdays.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -920,7 +875,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -944,10 +899,9 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/birthdays_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/single-file-processed-dpp/1/single-file-processed-dpp_zip']['status'], 'SUCCEEDED')
@@ -972,13 +926,7 @@ class TestFlow(unittest.TestCase):
         )
 
         path = paths['birthdays']
-        assert path.startswith('{}{}/datahub/private/birthdays/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-
-        self.assertEqual(res.status_code, 403)
-
-        path = paths['birthdays_original']
-        assert path.startswith('{}{}/datahub/private/birthdays_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/private/birthdays/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
 
         self.assertEqual(res.status_code, 403)
@@ -1019,7 +967,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'private')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 20)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -1044,10 +992,9 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/private/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/birthdays']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/private/1/birthdays_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/birthdays_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/birthdays_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/private/1/private_zip']['status'], 'SUCCEEDED')
@@ -1068,14 +1015,7 @@ class TestFlow(unittest.TestCase):
             for r in res['resources']
         )
         path = paths['schema-types']
-        assert path.startswith('{}{}/datahub/all-schema-types/schema-types/data'.format(S3_SERVER, bucket_name))
-        res = requests.get(path)
-        exp_csv = open('../../outputs/csv/sample_schema-types.csv').read()
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(exp_csv, res.text)
-
-        path = paths['schema-types_original']
-        assert path.startswith('{}{}/datahub/all-schema-types/schema-types_original/archive'.format(S3_SERVER, bucket_name))
+        assert path.startswith('{}{}/datahub/all-schema-types/schema-types/archive'.format(S3_SERVER, bucket_name))
         res = requests.get(path)
         exp_csv = open('../../outputs/csv/sample_schema-types.csv').read()
         self.assertEqual(res.status_code, 200)
@@ -1122,7 +1062,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(datahub['findability'],'published')
         self.assertEqual(datahub['owner'],'datahub')
         self.assertEqual(datahub['stats']['rowcount'], 2)
-        self.assertEqual(len(datapackage['resources']), 6)
+        self.assertEqual(len(datapackage['resources']), 5)
 
         res = requests.get('http://localhost:9200/events/_search')
         self.assertEqual(res.status_code, 200)
@@ -1147,10 +1087,9 @@ class TestFlow(unittest.TestCase):
 
         info = res.json()
         self.assertEqual(info['state'], 'SUCCEEDED')
-        self.assertEqual(len(info['pipelines']), 8)
+        self.assertEqual(len(info['pipelines']), 7)
         self.assertEqual(info['pipelines']['datahub/all-schema-types/1']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types']['status'], 'SUCCEEDED')
-        self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_original']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_csv']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/all-schema-types/1/schema-types_json']['status'], 'SUCCEEDED')
         self.assertEqual(info['pipelines']['datahub/all-schema-types/1/all-schema-types_zip']['status'], 'SUCCEEDED')
