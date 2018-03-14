@@ -17,18 +17,22 @@ inputs:
           name: birthdays
           path: data/birthdays.xlsx
           format: xlsx
-          schema:
-            fields:
-              -
-                name: date
-                type: date
-              -
-                name: first_name
-                type: string
-              -
-                name: last_name
-                type: string
 outputs:
 - kind: zip
   parameters:
     out-file: 'excel.zip'
+processing:
+  -
+    input: birthdays
+    output: birthdays
+    schema:
+      fields:
+        -
+          name: date
+          type: date
+        -
+          name: first_name
+          type: string
+        -
+          name: last_name
+          type: string
