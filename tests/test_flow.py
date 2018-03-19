@@ -723,6 +723,111 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(info['pipelines']['datahub/excel/1/birthdays_csv_preview']['status'], 'SUCCEEDED')
 
 
+    def test_excel_file_multiple_sheets(self):
+        run_factory(os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'inputs/excel_multiple_sheets'))
+        time.sleep(180)
+        res = requests.get(
+            '{}{}/datahub/sample-2-sheets/1/datapackage.json'.format(S3_SERVER, bucket_name)).json()
+        paths = dict(
+            (r['name'], r['path'])
+            for r in res['resources']
+        )
+
+        path = paths['sample-2-sheets-sheet-1']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-1/archive/'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+        exp_csv = open('../../outputs/csv/sample_excel_sheet_1.csv').read()
+
+        path = paths['sample-2-sheets-sheet-1_csv']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-1_csv/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
+
+        path = paths['sample-2-sheets-sheet-1_json']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-1_json/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        exp_json = json.load(open('../../outputs/json/sample_excel_sheet_1.json'))
+        self.assertListEqual(exp_json, res.json())
+
+        path = paths['sample-2-sheets-sheet-2']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-2/archive/'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+        exp_csv = open('../../outputs/csv/sample_excel_sheet_2.csv').read()
+
+        path = paths['sample-2-sheets-sheet-2_csv']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-2_csv/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(exp_csv.replace('\n', '\r\n'), res.text)
+
+        path = paths['sample-2-sheets-sheet-2_json']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets-sheet-2_json/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        exp_json = json.load(open('../../outputs/json/sample_excel_sheet_2.json'))
+        self.assertListEqual(exp_json, res.json())
+
+        path = paths['validation_report']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/validation_report/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+        report = res.json()
+        self.assertTrue(report[0]['valid'])
+
+        path = paths['sample-2-sheets_zip']
+        assert path.startswith('{}{}/datahub/sample-2-sheets/sample-2-sheets_zip/data'.format(S3_SERVER, bucket_name))
+        res = requests.get(path)
+        self.assertEqual(res.status_code, 200)
+
+        # Elasticsearch
+        res = requests.get('http://localhost:9200/datahub/_search')
+        self.assertEqual(res.status_code, 200)
+        #
+        meta = res.json()
+        hits = [hit['_source'] for hit in meta['hits']['hits']
+            if hit['_source']['datapackage']['name'] == 'sample-2-sheets']
+        self.assertEqual(len(hits), 1)
+
+        datahub = hits[0]['datahub']
+        datapackage = hits[0]['datapackage']
+        self.assertEqual(datahub['findability'],'published')
+        self.assertEqual(datahub['owner'],'datahub')
+        self.assertEqual(datahub['stats']['rowcount'], 4)
+        self.assertEqual(len(datapackage['resources']), 8)
+
+        res = requests.get('http://localhost:9200/events/_search')
+        self.assertEqual(res.status_code, 200)
+
+        events = res.json()
+        hits = [hit['_source'] for hit in events['hits']['hits']
+            if hit['_source']['dataset'] == 'sample-2-sheets']
+        self.assertEqual(len(hits), 1)
+
+        event = hits[0]
+        self.assertEqual(event['event_action'],'finish')
+        self.assertEqual(event['event_entity'], 'flow')
+        self.assertEqual(event['owner'], 'datahub')
+        self.assertEqual(event['status'], 'OK')
+
+        # Specstore
+        res = requests.get(info_latest % 'sample-2-sheets')
+        self.assertEqual(res.status_code, 200)
+        res = requests.get(info_successful % 'sample-2-sheets')
+        self.assertEqual(res.status_code, 200)
+
+        info = res.json()
+        self.assertEqual(info['state'], 'SUCCEEDED')
+        self.assertEqual(len(info['pipelines']), 11)
+        self.assertEqual(info['pipelines']['datahub/sample-2-sheets/1']['status'], 'SUCCEEDED')
+
+
     def test_needs_processing(self):
         run_factory(os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'inputs/needs_processing'))

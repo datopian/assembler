@@ -1,0 +1,57 @@
+meta:
+  dataset: sample-2-sheets
+  findability: published
+  owner: datahub
+  ownerid: datahub
+  version: 1
+inputs:
+- kind: datapackage
+  parameters:
+    descriptor:
+      name: sample-2-sheets
+      resources:
+      - encoding: windows-1252
+        format: xlsx
+        mediatype: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        name: sample-2-sheets
+        path: sample-2-sheets.xlsx
+        pathType: local
+      title: Sample 2 sheets
+    resource-mapping:
+      sample-2-sheets.xlsx: ../../data/sample-2-sheets.xlsx
+  url: datapackage.json
+processing:
+- input: sample-2-sheets
+  output: sample-2-sheets-sheet-1
+  schema:
+    fields:
+    - format: default
+      name: header1
+      type: string
+    - format: default
+      name: header2
+      type: string
+    - format: default
+      name: header3
+      type: string
+    missingValues:
+    - ''
+  tabulator:
+    sheet: 1
+- input: sample-2-sheets
+  output: sample-2-sheets-sheet-2
+  schema:
+    fields:
+    - format: default
+      name: header4
+      type: string
+    - format: default
+      name: header5
+      type: string
+    - format: default
+      name: header6
+      type: string
+    missingValues:
+    - ''
+  tabulator:
+    sheet: 2

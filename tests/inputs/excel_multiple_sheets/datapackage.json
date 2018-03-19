@@ -1,0 +1,14 @@
+{
+  "name": "sample-2-sheets",
+  "resources": [
+    {
+      "encoding": "windows-1252",
+      "format": "xlsx",
+      "mediatype": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "name": "sample-2-sheets",
+      "path": "sample-2-sheets.xlsx",
+      "pathType": "local"
+    }
+  ],
+  "title": "Sample 2 sheets"
+}
